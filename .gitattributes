@@ -1,0 +1,26 @@
+# The app asset is a single 3.8 MB HTML file. Two things must not happen to it.
+#
+# 1. Line-ending translation. Git's autocrlf would rewrite LF to CRLF on a
+#    Windows checkout. The file contains base64 data URIs (the résumé, the
+#    photo, the icons) and JavaScript string literals; changing bytes inside
+#    them corrupts the app. -text turns all translation off.
+#
+# 2. Diffing. It is one line of 3.1 MB in places. Marking it binary keeps
+#    `git diff` and the GitHub web UI from trying to render it, which is what
+#    makes a pull request page hang.
+*.html -text -diff
+
+# Same reasoning, plus these are genuinely binary.
+*.jks binary
+*.png binary
+*.jpg binary
+*.webp binary
+*.ttf binary
+*.woff2 binary
+
+# Shell scripts must keep LF or they will not run on the CI runner.
+*.sh text eol=lf
+*.yml text eol=lf
+*.gradle text eol=lf
+*.java text eol=lf
+*.xml text eol=lf

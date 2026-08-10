@@ -1,0 +1,165 @@
+/* DawaSafe Android — app/build.gradle
+   ------------------------------------------------------------------------
+   ZERO third-party dependencies, on purpose.
+
+   Everything this app needs (WebView, AlarmManager, Notification) is in the
+   Android framework. Adding androidx.core just for NotificationCompat would
+   mean the build can fail on a dependency-resolution hiccup in CI, and the
+   person running that CI is not going to be able to debug it. The extra
+   ~40 lines of API-level branching in Notifier.java is a fair trade.
+   ------------------------------------------------------------------------ */
+plugins {
+    id 'com.android.application'
+}
+
+android {
+    namespace 'com.dawasafe.app'
+    compileSdk 34
+
+    defaultConfig {
+        applicationId "com.dawasafe.app"
+
+        /* minSdk 21 = Android 5.0 Lollipop (2014).
+           This matches the app's own compatibility floor: the whole v7 pass was
+           spent making the JavaScript parse on an old WebView. Going lower is
+           not useful — Android 4.4's WebView cannot be updated from the Play
+           Store, so it would be stuck at Chrome 33 forever. */
+        minSdk 21
+        targetSdk 34
+
+        versionCode 8
+        versionName "8.0"
+
+        /* The app does its own translation in JavaScript (English, Hindi,
+           Kannada) and stores the choice itself, so the only Android resources
+           that need translating are the notification channel names the user sees
+           in system Settings. Listing the three locales keeps the framework from
+           packaging dozens of unused ones. */
+        resConfigs "en", "hi", "kn"
+    }
+
+    signingConfigs {
+        release {
+            /* A committed debug-grade key. This is NOT a Play Store key: it is
+               here so every build of this project produces an APK signed with
+               the SAME certificate, which is what lets an update install over
+               a previous install instead of erroring with
+               INSTALL_FAILED_UPDATE_INCOMPATIBLE and wiping the user's data.
+
+               If you ever publish to the Play Store, replace this with your own
+               key and keep it out of git. For sideloading to family phones this
+               is exactly right. */
+            storeFile file("../keystore/dawasafe.jks")
+            storePassword "dawasafe"
+            keyAlias "dawasafe"
+            keyPassword "dawasafe"
+        }
+    }
+
+    buildTypes {
+        debug {
+            /* Same key as release so you can move between the two builds on one
+               phone without uninstalling (which would delete the medicine list). */
+            signingConfig signingConfigs.release
+            minifyEnabled false
+        }
+        release {
+            signingConfig signingConfigs.release
+
+            /* NOT minified. R8 would strip the @JavascriptInterface methods
+               the WebView calls by name — the alarm bridge would compile fine
+               and then silently do nothing at runtime, which for a medicine
+               reminder is the single worst outcome. proguard-rules.pro keeps
+               them anyway as a second line of defence if this is ever turned on. */
+            minifyEnabled false
+            shrinkResources false
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
+    }
+
+    /* index.html is left COMPRESSED (i.e. no noCompress rule).
+
+       An earlier version of this file excluded 'html' from compression, on the
+       theory that the WebView could then mmap the asset instead of inflating it.
+       That trade does not hold up: the file is mostly one enormous JavaScript
+       object literal, so it compresses roughly 3.8 MB -> 1.2 MB, and leaving it
+       uncompressed adds ~2.6 MB to an APK that people will be sending each other
+       over WhatsApp on metered connections. What it buys back is one gzip inflate
+       at launch, which is tens of milliseconds even on a slow phone.
+
+       Small APK wins. If cold-start ever becomes the complaint, measure it before
+       trading 2.6 MB for it. */
+
+    compileOptions {
+        /* Java 11, not 17. AGP 8.5 itself runs on JDK 17 — that is a separate
+           thing from the language level compiled for the app, and at minSdk 21
+           every extra language level is more desugaring between the source and
+           what actually runs on an Android 5 phone. Nothing here needs past
+           Java 11, so this is the shortest path to the device. */
+        sourceCompatibility JavaVersion.VERSION_11
+        targetCompatibility JavaVersion.VERSION_11
+    }
+
+    lint {
+        /* Do not let a lint opinion break an APK build that someone is waiting on. */
+        abortOnError false
+        checkReleaseBuilds false
+    }
+
+    /* No packaging/excludes block: with zero dependencies there are no duplicate
+       META-INF entries to resolve. Adding one "just in case" would be config that
+       nobody can later tell is load-bearing or not. */
+}
+
+/* ---------------------------------------------------------------------------
+   The app itself: DawaSafe-v8.html, committed ONCE at the project root and
+   copied into assets at build time.
+
+   The obvious alternative is to commit it directly as
+   app/src/main/assets/index.html. That means the same 3.8 MB file exists twice
+   in the repository under two names, and nothing keeps them in step: someone
+   updates the one they were given, rebuilds, and ships the other. A copy step
+   makes the root file the single source of truth.
+
+   If the source file is missing the build FAILS here, loudly. Letting it
+   through would produce an APK that installs, launches, and shows a blank
+   white screen - a failure that only appears on the phone, after the person
+   has already sent it to their family.
+   --------------------------------------------------------------------------- */
+def webAppSource = rootProject.file("DawaSafe-v8.html")
+def webAppTarget = layout.buildDirectory.dir("generated/dawasafe-assets")
+
+def stageWebApp = tasks.register('stageWebApp', Copy) {
+    from(webAppSource) { rename { 'index.html' } }
+    into webAppTarget
+
+    doFirst {
+        if (!webAppSource.exists()) {
+            throw new GradleException(
+                "DawaSafe-v8.html is missing from the project root.\n" +
+                "That file IS the app - without it the APK opens to a blank screen.\n" +
+                "Expected at: ${webAppSource.absolutePath}")
+        }
+        // ~3.8 MB. Anything tiny is the wrong file, or a Git LFS pointer that
+        // was never fetched (those are a few hundred bytes of text).
+        if (webAppSource.length() < 1_000_000) {
+            throw new GradleException(
+                "DawaSafe-v8.html is only ${webAppSource.length()} bytes; the real " +
+                "build is ~3.8 MB.\nThis is the wrong file, or Git LFS did not fetch it.")
+        }
+        def head = webAppSource.getText('UTF-8').take(400_000)
+        if (!head.contains('DS_TTS_NATIVE')) {
+            throw new GradleException(
+                "DawaSafe-v8.html does not contain the v8 early block " +
+                "(DS_TTS_NATIVE).\nThis looks like a pre-v8 export: dose reminders " +
+                "would never reach Android.")
+        }
+    }
+}
+
+android.sourceSets.main.assets.srcDir(webAppTarget)
+tasks.named('preBuild') { dependsOn stageWebApp }
+
+dependencies {
+    /* intentionally empty — see the header comment */
+}

@@ -1,0 +1,22 @@
+/* DawaSafe Android — settings.gradle
+   Repositories are declared here (AGP 8 style) rather than in the root
+   build.gradle, so a stray `allprojects { repositories { } }` block cannot
+   silently override them. */
+pluginManagement {
+    repositories {
+        google()
+        mavenCentral()
+        gradlePluginPortal()
+    }
+}
+
+dependencyResolutionManagement {
+    repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
+    repositories {
+        google()
+        mavenCentral()
+    }
+}
+
+rootProject.name = "DawaSafe"
+include ":app"

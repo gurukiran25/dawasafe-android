@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  The full-screen dose alarm.
+
+  This is the screen an elderly user sees at 8am on a locked phone, often
+  without glasses, so every size here is deliberate:
+
+    * The medicine name is 34sp, not a label-sized 16sp.
+    * The two buttons are 72dp tall and full width. A 48dp button is the
+      accessibility minimum for a steady hand; a shaking one needs more.
+    * "I have taken it" is visually dominant and sits at the bottom, under the
+      thumb. Snooze is present but quieter - the design should not make
+      deferring a dose the easiest action.
+    * No dismiss-without-answering control. Back and the notification are both
+      still available, so the user is never trapped, but the screen does not
+      offer "ignore" as a first-class button.
+
+  Colours come from values/colors.xml so the dark alarm background stays in one
+  place. Text is sp (scales with the user's font-size setting) while the boxes
+  are dp; the layout is a ScrollView so a user on 200% font size can still reach
+  the buttons instead of having them pushed off-screen.
+-->
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/ds_alarm_bg"
+    android:fillViewport="true">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:gravity="center_horizontal"
+        android:padding="24dp">
+
+        <TextView
+            android:id="@+id/alarm_clock"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="24dp"
+            android:textSize="56sp"
+            android:textColor="@color/ds_on_brand"
+            android:includeFontPadding="false"
+            android:text="" />
+
+        <TextView
+            android:id="@+id/alarm_title"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="20dp"
+            android:gravity="center"
+            android:textSize="20sp"
+            android:textColor="@color/ds_alarm_muted"
+            android:text="@string/notif_dose_title" />
+
+        <TextView
+            android:id="@+id/alarm_body"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:layout_marginBottom="8dp"
+            android:gravity="center"
+            android:lineSpacingMultiplier="1.25"
+            android:textSize="34sp"
+            android:textStyle="bold"
+            android:textColor="@color/ds_on_brand"
+            android:text="" />
+
+        <!-- Pushes the buttons to the bottom on a tall screen, collapses to
+             nothing on a short one. -->
+        <Space
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:minHeight="24dp" />
+
+        <Button
+            android:id="@+id/alarm_btn_taken"
+            android:layout_width="match_parent"
+            android:layout_height="72dp"
+            android:layout_marginTop="12dp"
+            android:background="@drawable/bg_btn_primary"
+            android:textColor="@color/ds_on_brand"
+            android:textSize="22sp"
+            android:textStyle="bold"
+            android:textAllCaps="false"
+            android:text="@string/alarm_taken" />
+
+        <Button
+            android:id="@+id/alarm_btn_snooze"
+            android:layout_width="match_parent"
+            android:layout_height="64dp"
+            android:layout_marginTop="12dp"
+            android:layout_marginBottom="16dp"
+            android:background="@drawable/bg_btn_ghost"
+            android:textColor="@color/ds_on_brand"
+            android:textSize="19sp"
+            android:textAllCaps="false"
+            android:text="@string/alarm_snooze" />
+
+    </LinearLayout>
+</ScrollView>

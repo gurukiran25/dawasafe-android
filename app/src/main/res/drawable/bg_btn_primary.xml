@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Primary alarm button background.
+
+  A plain <shape> would give no press feedback, and on a full-screen alarm the
+  user needs to see that the tap landed - otherwise they tap again, and a double
+  "Taken" is a queued duplicate. The pressed state is a visibly darker teal
+  rather than a subtle ripple, because a ripple is easy to miss on a phone held
+  at arm's length.
+-->
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:state_pressed="true">
+        <shape android:shape="rectangle">
+            <solid android:color="@color/ds_btn_primary_press" />
+            <corners android:radius="14dp" />
+        </shape>
+    </item>
+    <item>
+        <shape android:shape="rectangle">
+            <solid android:color="@color/ds_btn_primary" />
+            <corners android:radius="14dp" />
+        </shape>
+    </item>
+</selector>

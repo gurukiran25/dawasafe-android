@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">DawaSafe</string>
+
+    <!-- Notification channels. Wording is deliberately plain: these strings are
+         what the user sees in Android's own Settings > Notifications screen,
+         where our in-app translations do not apply. -->
+    <string name="chan_dose_name">Medicine dose alarms</string>
+    <string name="chan_dose_desc">Rings when a dose is due. Keep this ON — turning it off means no reminder will ever appear.</string>
+    <string name="chan_info_name">App messages</string>
+    <string name="chan_info_desc">Quiet notices, such as a reminder to reopen the app so alarms stay scheduled.</string>
+
+    <!-- Notification content shown when the app is closed. -->
+    <string name="notif_dose_title">Time for your medicine</string>
+    <string name="notif_action_taken">Taken</string>
+    <string name="notif_action_snooze">Snooze</string>
+    <string name="notif_open">Open</string>
+    <!-- Confirmation after Snooze. Only a fallback: the app pushes down a
+         translated template, because this is read while the app is closed. -->
+    <string name="notif_snoozed_until">Snoozed until %1$s</string>
+
+    <!-- Alarm screen -->
+    <string name="alarm_taken">I have taken it</string>
+    <string name="alarm_snooze">Remind me later</string>
+    <string name="alarm_dismiss">Dismiss</string>
+
+    <!-- Shown only when the device WebView is too old to run the app safely.
+         Failing loudly here is the whole point: a half-rendered medicine
+         checker is more dangerous than one that refuses to start. -->
+    <string name="webview_old_title">Please update Android System WebView</string>
+    <string name="webview_old_body">DawaSafe needs a newer version of the component Android uses to display pages. Without it, parts of the safety check may not load and you could be shown an incomplete result.\n\nOpen the Play Store and update \"Android System WebView\" and \"Google Chrome\", then reopen DawaSafe.</string>
+    <string name="webview_old_open">Open Play Store</string>
+    <string name="webview_old_continue">Continue anyway</string>
+
+    <string name="load_failed_title">Could not open DawaSafe</string>
+    <string name="load_failed_body">The app files could not be read. Reinstalling the APK usually fixes this.</string>
+
+    <string name="exit_confirm">Press back again to close DawaSafe</string>
+    <string name="saved_to">Saved: %1$s</string>
+    <string name="save_failed">Could not save the file.</string>
+    <string name="no_app_for_link">No app on this phone can open that link.</string>
+    <string name="print_unsupported">Printing is not available on this device. Use Share instead to send the report.</string>
+</resources>

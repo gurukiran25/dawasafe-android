@@ -1,0 +1,89 @@
+# Builds the DawaSafe APK and attaches it to the run as a download.
+#
+# Why this workflow provisions Gradle instead of using ./gradlew:
+# the wrapper needs gradle-wrapper.jar, a binary that cannot be generated
+# without already having Gradle. This project was authored offline, so there is
+# no jar to commit. setup-gradle installs a pinned Gradle instead, which gets
+# to the same place with one less binary in the repository.
+#
+# Everything is pinned. An unpinned toolchain means a build that worked last
+# month fails today with no code change, and the person who just wants an APK
+# for their mother's phone has no way to debug that.
+
+name: Build APK
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+  workflow_dispatch: # the "Run workflow" button, for a build on demand
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      - name: Check out the project
+        uses: actions/checkout@v4
+
+      # JDK 17 is what Android Gradle Plugin 8.5.2 runs on. This is separate
+      # from the app's Java 11 language level in app/build.gradle: 17 runs the
+      # build, 11 is what gets compiled for the phone.
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Set up Gradle 8.7
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '8.7'
+
+      # Fail early and legibly. The APK is useless without the app inside it,
+      # and a missing asset otherwise surfaces as a blank white screen on the
+      # phone long after CI reported success. Gradle checks this too (see
+      # stageWebApp in app/build.gradle); this runs first so the error is the
+      # top line of the log rather than buried in a Gradle stack trace.
+      - name: Verify the web app is present
+        run: |
+          ASSET=DawaSafe-v8.html
+          if [ ! -f "$ASSET" ]; then
+            echo "::error::$ASSET is missing from the repository root. That file IS the app."
+            exit 1
+          fi
+          BYTES=$(wc -c < "$ASSET")
+          echo "app size: $BYTES bytes"
+          if [ "$BYTES" -lt 1000000 ]; then
+            echo "::error::$ASSET is only $BYTES bytes; the real build is ~3.8 MB. Wrong file, or Git LFS did not fetch it."
+            exit 1
+          fi
+          # The two v8 blocks are what make the native alarm bridge work. If the
+          # file is an older export, reminders quietly fall back to the in-page
+          # timer and stop when the app is closed.
+          grep -q 'DS_QA8' "$ASSET" || { echo "::error::no v8 block (DS_QA8 not found) - this looks like a pre-v8 export."; exit 1; }
+          grep -q 'DS_TTS_NATIVE' "$ASSET" || { echo "::error::no v8 early block (DS_TTS_NATIVE not found)."; exit 1; }
+          echo "looks like a v8 build"
+
+      - name: Build release APK
+        run: gradle assembleRelease --no-daemon --stacktrace
+
+      # Named with the run number so successive downloads do not all land in
+      # the Downloads folder as index (1).apk, index (2).apk ...
+      - name: Rename the APK
+        run: |
+          SRC=app/build/outputs/apk/release/app-release.apk
+          ls -la app/build/outputs/apk/release/
+          cp "$SRC" "DawaSafe-v8.0-build${{ github.run_number }}.apk"
+
+      - name: Upload the APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: DawaSafe-APK
+          path: DawaSafe-v8.0-build${{ github.run_number }}.apk
+          if-no-files-found: error
+          retention-days: 90

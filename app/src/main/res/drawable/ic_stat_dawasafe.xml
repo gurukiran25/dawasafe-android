@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Status-bar (small) notification icon.
+
+  Android draws this as a SILHOUETTE: the colour is thrown away and every
+  non-transparent pixel is painted white. An earlier draft of this file used a
+  white capsule with a BLACK dividing line — which would have been repainted
+  white as well, collapsing the icon into a featureless blob.
+
+  So it is drawn with STROKES and no fill. The outline and the divider are the
+  only opaque pixels, the interior stays transparent, and the capsule stays
+  readable at 24dp next to a dozen other status-bar icons.
+
+  Matching PNGs also exist in drawable-mdpi .. drawable-xxxhdpi. That is not
+  redundancy: RemoteViews on API 21-23 cannot reliably inflate a VectorDrawable,
+  and a notification icon that fails to inflate shows nothing at all. Android
+  prefers the density-qualified PNG on those releases and this vector from
+  API 24 on.
+-->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp"
+    android:height="24dp"
+    android:viewportWidth="24"
+    android:viewportHeight="24">
+    <group
+        android:pivotX="12"
+        android:pivotY="12"
+        android:rotation="-45">
+        <path
+            android:strokeColor="#FFFFFFFF"
+            android:strokeWidth="2"
+            android:strokeLineCap="round"
+            android:strokeLineJoin="round"
+            android:pathData="M8.5,8.5 L15.5,8.5 A3.5,3.5 0 0 1 15.5,15.5 L8.5,15.5 A3.5,3.5 0 0 1 8.5,8.5 Z" />
+        <path
+            android:strokeColor="#FFFFFFFF"
+            android:strokeWidth="2"
+            android:strokeLineCap="round"
+            android:pathData="M12,8.5 L12,15.5" />
+    </group>
+</vector>

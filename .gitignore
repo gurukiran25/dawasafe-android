@@ -1,0 +1,26 @@
+# Build output — regenerated every build, never committed.
+build/
+app/build/
+.gradle/
+local.properties
+
+# IDE
+.idea/
+*.iml
+.DS_Store
+
+# NOTE what is deliberately NOT ignored:
+#
+#   keystore/dawasafe.jks      committed on purpose, so every build signs with
+#                              the same certificate and updates install over a
+#                              previous install instead of wiping the user's
+#                              medicine list. See README, "Updating".
+#
+#   DawaSafe-v8.html           the app itself, ~3.8 MB, at the PROJECT ROOT.
+#                              The build copies it into app assets
+#                              (see app/build.gradle stageWebApp). An ignore
+#                              rule here would produce an APK that builds
+#                              cleanly and opens to a blank white screen.
+#
+#   app/src/main/assets/       deliberately empty in git; the staged copy is
+#                              generated into app/build/generated each build.

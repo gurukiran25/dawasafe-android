@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Theme.Material (API 21+) rather than AppCompat, because this project
+         has zero third-party dependencies. The Activity hosts nothing but a
+         full-bleed WebView, so a themed action bar would only steal space
+         from the page. -->
+    <style name="Theme.DawaSafe" parent="@android:style/Theme.Material.Light.NoActionBar">
+        <!-- windowBackground is set to the app's own background colour so the
+             first frame is not a white flash followed by a colour change. -->
+        <item name="android:windowBackground">@color/ds_bg</item>
+        <item name="android:colorPrimary">@color/ds_brand</item>
+        <item name="android:colorPrimaryDark">@color/ds_brand_dark</item>
+        <item name="android:colorAccent">@color/ds_brand</item>
+        <item name="android:statusBarColor">@color/ds_brand_dark</item>
+        <item name="android:windowLightStatusBar">false</item>
+    </style>
+
+    <style name="Theme.DawaSafe.Alarm" parent="@android:style/Theme.Material.NoActionBar">
+        <item name="android:windowBackground">@color/ds_alarm_bg</item>
+        <item name="android:statusBarColor">@color/ds_alarm_bg</item>
+        <item name="android:navigationBarColor">@color/ds_alarm_bg</item>
+    </style>
+</resources>

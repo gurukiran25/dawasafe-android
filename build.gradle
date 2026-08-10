@@ -1,0 +1,17 @@
+/* DawaSafe Android — root build.gradle
+   Versions are PINNED. CI machines resolve fresh every run, so an unpinned
+   "8.+" would mean a build that worked last month fails today with no code
+   change — the worst possible failure mode for someone who just wants an APK. */
+buildscript {
+    ext {
+        agpVersion = '8.5.2'
+    }
+}
+
+plugins {
+    id 'com.android.application' version "$agpVersion" apply false
+}
+
+tasks.register('clean', Delete) {
+    delete rootProject.layout.buildDirectory
+}

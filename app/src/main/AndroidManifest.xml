@@ -1,0 +1,166 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  DawaSafe — AndroidManifest.xml
+
+  Two decisions here are worth reading before you change anything.
+
+  1. INTERNET is granted, because the app genuinely uses it: the live NLM name
+     search, the openFDA side-effect lookup, and the OCR reader the Scan tab
+     downloads on first use. Removing it would not make the app "more private",
+     it would silently kill the Scan tab forever. Cleartext is blocked, so those
+     calls can only ever go out over HTTPS.
+
+  2. allowBackup is FALSE. The app's own privacy card says "All profiles,
+     medicine lists and schedules stay in your browser on this device."
+     Android auto-backup would copy exactly that data to the user's Google
+     Drive and make that sentence untrue. The migration path is the app's own
+     Export button in Settings, which now writes a real file through the system
+     file picker. See README "Moving to a new phone".
+-->
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+
+    <!-- Android 13+ (API 33). Without this, notifications are silently dropped
+         and the user sees nothing at dose time. Also requested at runtime. -->
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+
+    <!-- Re-arm alarms after a reboot. AlarmManager forgets everything on
+         restart, so without this a phone that restarted overnight would miss
+         the morning dose with no warning at all. -->
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
+
+    <!-- Exact alarms.
+         API 31/32: SCHEDULE_EXACT_ALARM, granted at install, revocable in Settings.
+         API 33+  : USE_EXACT_ALARM, auto-granted, and reserved by Google for apps
+                    whose core purpose is user-set alarms. A medicine dose time
+                    is precisely that, which is why it is claimed here.
+         The code never assumes either was granted — AlarmScheduler checks
+         canScheduleExactAlarms() every time and tells the user the truth. -->
+    <uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM"
+        android:maxSdkVersion="32" />
+    <uses-permission android:name="android.permission.USE_EXACT_ALARM" />
+
+    <uses-permission android:name="android.permission.WAKE_LOCK" />
+    <uses-permission android:name="android.permission.VIBRATE" />
+
+    <!-- Shows the dose alarm over the lockscreen (API 29+ requires this). -->
+    <uses-permission android:name="android.permission.USE_FULL_SCREEN_INTENT" />
+
+    <!-- The Scan tab photographs a medicine strip. Requested at runtime, only at
+         the moment the user taps Scan, and never at first launch: asking an
+         elderly user for camera access before they know why is how an app gets
+         a permanent denial. Declined simply means the gallery is used instead. -->
+    <uses-permission android:name="android.permission.CAMERA" />
+
+    <!-- Pre-KitKat only. On API 19+ the export goes through the Storage Access
+         Framework, where the user picks the destination and no permission is
+         needed at all. -->
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"
+        android:maxSdkVersion="18" />
+
+    <!-- Camera is optional: the Scan tab uses <input type="file"
+         capture="environment">, which falls back to the gallery on a phone or
+         tablet with no camera. Marking it not-required keeps the app installable
+         on cheap tablets. -->
+    <uses-feature android:name="android.hardware.camera" android:required="false" />
+    <uses-feature android:name="android.hardware.camera.autofocus" android:required="false" />
+    <uses-feature android:name="android.hardware.touchscreen" android:required="false" />
+    <uses-feature android:name="android.hardware.telephony" android:required="false" />
+
+    <application
+        android:name=".DawaSafeApp"
+        android:allowBackup="false"
+        android:icon="@mipmap/ic_launcher"
+        android:roundIcon="@mipmap/ic_launcher_round"
+        android:label="@string/app_name"
+        android:supportsRtl="false"
+        android:theme="@style/Theme.DawaSafe"
+        android:hardwareAccelerated="true"
+        android:largeHeap="true"
+        android:usesCleartextTraffic="false"
+        android:networkSecurityConfig="@xml/network_security_config"
+        tools:targetApi="34">
+
+        <!-- largeHeap: the inline Indian brand index is a 3.2 MB JavaScript
+             object literal that expands to a much larger in-memory structure.
+             On a 1 GB phone the default heap is tight; this asks for headroom
+             instead of gambling on an OutOfMemory in the middle of a search. -->
+
+        <activity
+            android:name=".MainActivity"
+            android:exported="true"
+            android:launchMode="singleTask"
+            android:configChanges="orientation|screenSize|smallestScreenSize|screenLayout|keyboardHidden|uiMode|density|fontScale|locale|layoutDirection"
+            android:windowSoftInputMode="adjustResize"
+            android:screenOrientation="unspecified">
+            <!-- configChanges: rotating the phone, or changing system font size,
+                 must NOT restart the Activity. A restart reloads the WebView and
+                 throws away whatever the user had half-entered into the check
+                 list. Elderly users change font size often, so fontScale being
+                 in this list is not a micro-optimisation. -->
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+
+        <!-- The dose alarm screen. A separate Activity so a full-screen intent
+             can show it over the lockscreen without disturbing whatever the user
+             had open in MainActivity. -->
+        <activity
+            android:name=".AlarmActivity"
+            android:exported="false"
+            android:launchMode="singleTop"
+            android:excludeFromRecents="true"
+            android:taskAffinity=".AlarmTask"
+            android:showWhenLocked="true"
+            android:turnScreenOn="true"
+            android:configChanges="orientation|screenSize|keyboardHidden|fontScale"
+            android:theme="@style/Theme.DawaSafe.Alarm" />
+
+        <!-- Hands the camera app a content:// URI to write a scanned photo into.
+             A file:// URI would throw FileUriExposedException from Android 7, and
+             this project has no AndroidX dependency to borrow FileProvider from.
+             Not exported: reachable only through a per-Intent URI grant, and it
+             serves exactly one cache subdirectory. See CacheProvider. -->
+        <provider
+            android:name=".CacheProvider"
+            android:authorities="com.dawasafe.app.files"
+            android:exported="false"
+            android:grantUriPermissions="true" />
+
+        <!-- Fires when a dose is due. Not exported: only our own AlarmManager
+             PendingIntent can trigger it. -->
+        <receiver
+            android:name=".AlarmReceiver"
+            android:exported="false" />
+
+        <!-- Handles the notification's Taken / Snooze buttons without opening
+             the app. Not exported. -->
+        <receiver
+            android:name=".ActionReceiver"
+            android:exported="false" />
+
+        <!-- Re-arms the next pending alarm after a reboot or an app update.
+             QUICKBOOT_POWERON covers HTC/Xiaomi devices that do not always send
+             the standard BOOT_COMPLETED. MY_PACKAGE_REPLACED covers installing a
+             newer APK over the old one, which also clears AlarmManager. -->
+        <receiver
+            android:name=".BootReceiver"
+            android:exported="true"
+            android:enabled="true">
+            <intent-filter android:priority="1000">
+                <action android:name="android.intent.action.BOOT_COMPLETED" />
+                <action android:name="android.intent.action.LOCKED_BOOT_COMPLETED" />
+                <action android:name="android.intent.action.QUICKBOOT_POWERON" />
+                <action android:name="com.htc.intent.action.QUICKBOOT_POWERON" />
+                <action android:name="android.intent.action.MY_PACKAGE_REPLACED" />
+                <action android:name="android.intent.action.TIME_SET" />
+                <action android:name="android.intent.action.TIMEZONE_CHANGED" />
+            </intent-filter>
+        </receiver>
+    </application>
+</manifest>

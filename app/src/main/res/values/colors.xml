@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Matches the app's own header colour so there is no colour "jump"
+         between the native window background and the page once it paints. -->
+    <color name="ds_brand">#0F766E</color>
+    <color name="ds_brand_dark">#0B5A54</color>
+    <color name="ds_bg">#FFFFFF</color>
+    <color name="ds_alarm_bg">#0B3B38</color>
+    <color name="ds_on_brand">#FFFFFF</color>
+    <!-- Secondary text on the dark alarm screen. #A9C9C5 on #0B3B38 is about
+         7.4:1, comfortably past WCAG AA for the large text it is used on, and
+         still legible to an older eye in daylight. -->
+    <color name="ds_alarm_muted">#A9C9C5</color>
+    <!-- Alarm buttons. Primary is the brand teal lifted for contrast against
+         the darker background; ghost is a transparent outline. -->
+    <color name="ds_btn_primary">#15A398</color>
+    <color name="ds_btn_primary_press">#0F8177</color>
+    <color name="ds_btn_ghost_stroke">#4E8A85</color>
+    <color name="ds_btn_ghost_press">#123F3C</color>
+</resources>

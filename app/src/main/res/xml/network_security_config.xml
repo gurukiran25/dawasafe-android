@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  The app talks to exactly three kinds of host: the NLM / openFDA APIs for live
+  lookups, and the CDN that serves the OCR reader for the Scan tab. All are
+  HTTPS. Cleartext is refused everywhere so a hostile network cannot downgrade a
+  medicine lookup to plain HTTP and rewrite the answer.
+-->
+<network-security-config>
+    <base-config cleartextTrafficPermitted="false">
+        <trust-anchors>
+            <certificates src="system" />
+        </trust-anchors>
+    </base-config>
+</network-security-config>
