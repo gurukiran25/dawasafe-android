@@ -147,12 +147,32 @@ def stageWebApp = tasks.register('stageWebApp', Copy) {
                 "DawaSafe-v8.html is only ${webAppSource.length()} bytes; the real " +
                 "build is ~3.8 MB.\nThis is the wrong file, or Git LFS did not fetch it.")
         }
-        def head = webAppSource.getText('UTF-8').take(400_000)
-        if (!head.contains('DS_TTS_NATIVE')) {
+        // Search the whole file, not a prefix. An earlier version read only the
+        // first 400 KB, on the assumption that a <script> near the top of the
+        // document is near the top of the FILE. It is not: the local medicine
+        // index is a single line of ~3.2 MB, so every v8 marker sits past
+        // character 3,270,000. The check could never see what it was looking
+        // for, and failed every build on a perfectly good file.
+        //
+        // Both markers are checked, because they are different blocks with
+        // different failure modes: without the early one, speech and the state
+        // restore are gone; without the late one there is no bridge at all and
+        // reminders quietly stop when the app is closed.
+        //
+        // The whole 3.8 MB does land in memory here. That is deliberate - it
+        // is what the previous version did too (getText() reads it all and
+        // .take() only trimmed the copy), it is nothing to a Gradle JVM, and a
+        // plain contains() cannot go subtly wrong the way a hand-rolled
+        // streaming search can.
+        def text = webAppSource.getText('UTF-8')
+        def missing = []
+        if (!text.contains('DS_TTS_NATIVE')) missing.add('the early block (DS_TTS_NATIVE)')
+        if (!text.contains('DS_QA8')) missing.add('the late block (DS_QA8)')
+        if (missing) {
             throw new GradleException(
-                "DawaSafe-v8.html does not contain the v8 early block " +
-                "(DS_TTS_NATIVE).\nThis looks like a pre-v8 export: dose reminders " +
-                "would never reach Android.")
+                "DawaSafe-v8.html is missing " + missing.join(' and ') + ".\n" +
+                "This looks like a pre-v8 export: dose reminders would never " +
+                "reach Android, and would stop when the app is closed.")
         }
     }
 }

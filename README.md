@@ -167,6 +167,16 @@ you do not need to put it in an `assets` folder yourself.)
 `DawaSafe-v8.html` is an older DawaSafe build without the Android alarm bridge.
 Replace it with the v8 file.
 
+**Red cross on "Build release APK" at `Task :app:stageWebApp FAILED`, when the
+step before it went green.** Those two steps check the same file, so if the
+first passed, the file is fine and the build script is wrong. This was a real
+bug, fixed on 2026-08-11: the Gradle check read only the first 400,000
+characters of the app looking for its version marker, but the built-in medicine
+index is a single line of ~3.2 MB, so every marker sits past character
+3,270,000. The check could not see what it was looking for and failed every
+build on a perfectly good file. If you see this, your `app/build.gradle`
+predates the fix — replace that one file and re-run.
+
 **Any other red cross.** Click the run, then the failed step, to expand the log.
 The last twenty lines almost always name the problem.
 
