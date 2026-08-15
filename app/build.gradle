@@ -12,6 +12,107 @@ plugins {
     id 'com.android.application'
 }
 
+/* ---------------------------------------------------------------------------
+   SIGNING KEY — dawasafe-new.jks, resolved at build time, never committed.
+   ---------------------------------------------------------------------------
+   Rotated on 2026-08-15. This file used to carry a keystore path and all three
+   passwords in plain text, next to a keystore committed at
+   keystore/dawasafe.jks whose password was the word "dawasafe". Anyone with the
+   repository therefore had everything needed to sign an APK that installs as
+   an UPDATE over a real DawaSafe install — same certificate, no warning, no
+   uninstall. For a medicine-reminder app that is the wrong thing to leave
+   lying around.
+
+   That key is now dead: it is replaced by dawasafe-new.jks, which lives only
+   outside the repository. Because the certificate changed, an APK from this
+   build will NOT install over an app signed by the old key — the old install
+   has to be removed first. That is a one-time cost, paid deliberately, and it
+   is why the workflow prints the new certificate fingerprint on every run.
+
+   Two sources, checked in this order:
+
+     1. Environment variables — what GitHub Actions uses.
+          KEYSTORE_FILE      absolute path to the decoded dawasafe-new.jks
+          KEYSTORE_PASSWORD  store password
+          KEY_ALIAS          alias inside the store
+          KEY_PASSWORD       password for that alias
+        The workflow writes the keystore to the runner's temp directory (NOT
+        into the checkout) and sets these four for the build step only.
+
+     2. Gradle properties — for signed builds on your own machine. Put these in
+        ~/.gradle/gradle.properties (on Windows: C:\Users\<you>\.gradle\
+        gradle.properties), which lives outside the project and so cannot be
+        committed by accident:
+          dawasafe.storeFile=C:/Users/you/keys/dawasafe-new.jks
+          dawasafe.storePassword=...
+          dawasafe.keyAlias=...
+          dawasafe.keyPassword=...
+
+        Use FORWARD slashes in that path even on Windows. A .properties file
+        treats backslash as an escape character, so C:\Users\you\keys becomes
+        C:Usersyoukeys and the build then reports a keystore that is not there.
+
+   If NONE of the four is set, the build still works: debug falls back to the
+   local Android debug keystore, so a fresh clone can build and run without
+   holding the release key. What it will not do is silently pretend — an
+   unsigned release APK says so, loudly, below.
+
+   If SOME but not all are set, that is a misconfigured secret rather than an
+   intentional unsigned build, and it fails here instead of thirty lines into
+   a Gradle stack trace.
+   --------------------------------------------------------------------------- */
+def dsSecret = { String envName, String propName ->
+    def value = System.getenv(envName)
+    if (!value?.trim() && project.hasProperty(propName)) {
+        value = project.property(propName) as String
+    }
+    return value?.trim() ?: null
+}
+
+def dsStorePath     = dsSecret('KEYSTORE_FILE',     'dawasafe.storeFile')
+def dsStorePassword = dsSecret('KEYSTORE_PASSWORD', 'dawasafe.storePassword')
+def dsKeyAlias      = dsSecret('KEY_ALIAS',         'dawasafe.keyAlias')
+def dsKeyPassword   = dsSecret('KEY_PASSWORD',      'dawasafe.keyPassword')
+
+/* Resolve the path here rather than inside the signingConfig, so that a path
+   that is set but wrong is reported as a missing FILE (with the absolute path
+   it looked at) instead of as a missing password. A leading ~ is expanded
+   because gradle.properties is hand-edited and people write ~ there; Gradle
+   does not expand it for you and would create a literal "~" directory. */
+def dsStoreFile = null
+if (dsStorePath) {
+    def expanded = dsStorePath.startsWith('~')
+        ? System.getProperty('user.home') + dsStorePath.substring(1)
+        : dsStorePath
+    def candidate = new File(expanded)
+    dsStoreFile = candidate.isAbsolute() ? candidate : project.file(expanded)
+}
+
+def dsProvided = [
+    'KEYSTORE_FILE / dawasafe.storeFile'        : dsStorePath,
+    'KEYSTORE_PASSWORD / dawasafe.storePassword': dsStorePassword,
+    'KEY_ALIAS / dawasafe.keyAlias'             : dsKeyAlias,
+    'KEY_PASSWORD / dawasafe.keyPassword'       : dsKeyPassword,
+]
+def dsMissing = dsProvided.findAll { !it.value }.keySet()
+
+if (dsMissing.size() > 0 && dsMissing.size() < dsProvided.size()) {
+    throw new GradleException(
+        "Signing is half-configured, which is never on purpose.\n" +
+        "Missing: " + dsMissing.join(', ') + "\n" +
+        "Set all four (env vars in CI, or dawasafe.* in ~/.gradle/gradle.properties), " +
+        "or none of them to build with the debug key.")
+}
+if (dsStorePath && !dsStoreFile?.isFile()) {
+    throw new GradleException(
+        "The keystore was named but is not there.\n" +
+        "Looked at: ${dsStoreFile?.absolutePath}\n" +
+        "In CI this means the decode step did not run or KEYSTORE_BASE64 is empty; " +
+        "locally it means dawasafe.storeFile points somewhere stale.")
+}
+
+def dsSigningReady = dsStoreFile?.isFile() && dsStorePassword && dsKeyAlias && dsKeyPassword
+
 android {
     namespace 'com.dawasafe.app'
     compileSdk 34
@@ -39,32 +140,50 @@ android {
     }
 
     signingConfigs {
-        release {
-            /* A committed debug-grade key. This is NOT a Play Store key: it is
-               here so every build of this project produces an APK signed with
-               the SAME certificate, which is what lets an update install over
-               a previous install instead of erroring with
-               INSTALL_FAILED_UPDATE_INCOMPATIBLE and wiping the user's data.
+        /* Declared only when the material actually exists. An always-present
+           config with null fields is worse than no config: AGP accepts it at
+           configuration time and then fails deep inside the signing task with
+           a message that does not mention secrets at all. */
+        if (dsSigningReady) {
+            release {
+                storeFile dsStoreFile
+                storePassword dsStorePassword
+                keyAlias dsKeyAlias
+                keyPassword dsKeyPassword
 
-               If you ever publish to the Play Store, replace this with your own
-               key and keep it out of git. For sideloading to family phones this
-               is exactly right. */
-            storeFile file("../keystore/dawasafe.jks")
-            storePassword "dawasafe"
-            keyAlias "dawasafe"
-            keyPassword "dawasafe"
+                /* v1 (JAR) signing is what an Android 5 phone understands; v2
+                   is what everything since Nougat prefers and verifies faster.
+                   Both, because minSdk is 21. Assignment form rather than
+                   `enableV1Signing true`, because these two are Boolean
+                   properties and the method-style setter is not guaranteed. */
+                enableV1Signing = true
+                enableV2Signing = true
+            }
         }
     }
 
     buildTypes {
         debug {
-            /* Same key as release so you can move between the two builds on one
-               phone without uninstalling (which would delete the medicine list). */
-            signingConfig signingConfigs.release
+            /* Same key as release, when it is available, so you can move between
+               the two builds on one phone without uninstalling (which would
+               delete the medicine list). Without the key this quietly uses the
+               standard Android debug keystore — fine for running the app, but a
+               debug build signed that way will NOT install over a release
+               build, and vice versa. */
+            if (dsSigningReady) {
+                signingConfig signingConfigs.release
+            }
             minifyEnabled false
         }
         release {
-            signingConfig signingConfigs.release
+            if (dsSigningReady) {
+                signingConfig signingConfigs.release
+            }
+            /* else: no signingConfig. Gradle emits app-release-unsigned.apk,
+               which cannot be installed on a phone at all. That is the correct
+               outcome for a build with no key — the CI workflow checks the
+               signature before it uploads anything, so an unsigned APK can
+               never reach someone's family as a download. */
 
             /* NOT minified. R8 would strip the @JavascriptInterface methods
                the WebView calls by name — the alarm bridge would compile fine
@@ -109,6 +228,20 @@ android {
     /* No packaging/excludes block: with zero dependencies there are no duplicate
        META-INF entries to resolve. Adding one "just in case" would be config that
        nobody can later tell is load-bearing or not. */
+}
+
+/* One line at the top of the log saying which key this build will use, because
+   "why will this APK not install over the old one" is otherwise a very long
+   afternoon. Never prints the passwords or the alias — a CI log is a public
+   document on a public repository. */
+gradle.projectsEvaluated {
+    if (dsSigningReady) {
+        logger.lifecycle("DawaSafe signing: release key from ${dsStoreFile.name} (provided at build time)")
+    } else {
+        logger.lifecycle("DawaSafe signing: NO release key provided.")
+        logger.lifecycle("  debug   -> local Android debug keystore")
+        logger.lifecycle("  release -> UNSIGNED (app-release-unsigned.apk, will not install on a phone)")
+    }
 }
 
 /* ---------------------------------------------------------------------------

@@ -9,6 +9,25 @@
 # Everything is pinned. An unpinned toolchain means a build that worked last
 # month fails today with no code change, and the person who just wants an APK
 # for their mother's phone has no way to debug that.
+#
+# THE SIGNING KEY IS NOT IN THIS REPOSITORY. It is dawasafe-new.jks, rotated on
+# 2026-08-15 to replace a key that had been committed along with its password.
+# It arrives as four repository secrets and exists on disk only inside this job:
+#
+#   KEYSTORE_BASE64    dawasafe-new.jks, base64-encoded
+#   KEYSTORE_PASSWORD  store password
+#   KEY_ALIAS          alias inside the store
+#   KEY_PASSWORD       password for that alias
+#
+# The decoded keystore is written to the runner's temp directory, deliberately
+# OUTSIDE the checked-out workspace, so that no build step, artifact upload, or
+# stray `git add -A` can pick it up. It is shredded when the job ends.
+#
+# Because the certificate changed, an APK from this workflow will NOT install
+# over a build signed by the old key: Android reports
+# INSTALL_FAILED_UPDATE_INCOMPATIBLE. The old app has to be uninstalled once.
+# The run summary prints the new certificate fingerprint so that this is a
+# thing you can check rather than guess at.
 
 name: Build APK
 
@@ -33,6 +52,8 @@ jobs:
       # JDK 17 is what Android Gradle Plugin 8.5.2 runs on. This is separate
       # from the app's Java 11 language level in app/build.gradle: 17 runs the
       # build, 11 is what gets compiled for the phone.
+      # It also brings keytool, which the next step uses to prove the secrets
+      # are usable before Gradle spends five minutes finding out they are not.
       - name: Set up JDK 17
         uses: actions/setup-java@v4
         with:
@@ -69,15 +90,207 @@ jobs:
           grep -q 'DS_TTS_NATIVE' "$ASSET" || { echo "::error::no v8 early block (DS_TTS_NATIVE not found)."; exit 1; }
           echo "looks like a v8 build"
 
+      # The whole point of the rotation is that no signing key is ever tracked
+      # in this repository again, so this is a failure rather than a warning,
+      # and it looks for ANY keystore rather than the one filename that was a
+      # problem in the past - a committed dawasafe-new.jks would be exactly as
+      # bad as the old one, and would otherwise sail straight through.
+      #
+      # This does not block the commit that removes the old key: git ls-files
+      # reports what is tracked at the commit being built, so the moment
+      # keystore/dawasafe.jks is deleted, the check passes. If you are applying
+      # the rotation now, delete it in the SAME commit as this workflow.
+      - name: Refuse to build if a keystore is committed
+        run: |
+          set -uo pipefail
+          TRACKED=$(git ls-files -- '*.jks' '*.keystore' '*.p12' '*.pfx' '*.bks' || true)
+          if [ -n "$TRACKED" ]; then
+            echo "::error::A signing keystore is committed to this repository:"
+            echo "$TRACKED" | sed 's/^/  /'
+            echo "The build does not read it - the key comes from KEYSTORE_BASE64 - but a"
+            echo "private key in git is a private key you no longer control."
+            echo "Remove it with:  git rm keystore/dawasafe.jks && git commit"
+            echo "and add *.jks to .gitignore so it cannot come back."
+            exit 1
+          fi
+          echo "no keystore tracked in the repository - good"
+
+      # Turn the secret back into a file, then PROVE it is usable before the
+      # build starts. keytool -list with the store password and the alias
+      # catches, in one go: base64 that did not survive copy-paste, a wrong
+      # KEYSTORE_PASSWORD, and a KEY_ALIAS that does not exist in the store.
+      # Those three are most of what goes wrong when moving a key into CI, and
+      # each one otherwise fails much later with a message about signing tasks
+      # rather than about secrets.
+      - name: Decode and check the signing key
+        env:
+          KEYSTORE_BASE64: ${{ secrets.KEYSTORE_BASE64 }}
+          KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
+          KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
+        run: |
+          set -euo pipefail
+
+          MISSING=""
+          [ -n "${KEYSTORE_BASE64:-}" ]   || MISSING="$MISSING KEYSTORE_BASE64"
+          [ -n "${KEYSTORE_PASSWORD:-}" ] || MISSING="$MISSING KEYSTORE_PASSWORD"
+          [ -n "${KEY_ALIAS:-}" ]         || MISSING="$MISSING KEY_ALIAS"
+          [ -n "${KEY_PASSWORD:-}" ]      || MISSING="$MISSING KEY_PASSWORD"
+          if [ -n "$MISSING" ]; then
+            echo "::error::Signing secrets not available:$MISSING"
+            echo "Set them under Settings -> Secrets and variables -> Actions."
+            echo "Note: secrets are never exposed to pull requests opened from a FORK,"
+            echo "so a fork PR cannot produce an installable APK by design. Push the"
+            echo "branch to this repository, or build the APK locally, instead."
+            exit 1
+          fi
+
+          # RUNNER_TEMP is outside the checked-out workspace and is destroyed
+          # with the runner. Defined once here and handed to the later steps
+          # through GITHUB_ENV, so the path cannot drift between them.
+          # (It is set in the shell rather than in a job-level `env:` block
+          # because the `runner` context is not available at job level.)
+          KEYSTORE_FILE="$RUNNER_TEMP/dawasafe-new.jks"
+          echo "KEYSTORE_FILE=$KEYSTORE_FILE" >> "$GITHUB_ENV"
+
+          # grep -v strips the -----BEGIN/END----- lines that Windows'
+          # `certutil -encode` adds; tr removes the newlines that every encoder
+          # wraps at. Base64 has no '-' in its alphabet, so neither filter can
+          # damage real payload.
+          printf '%s' "$KEYSTORE_BASE64" \
+            | grep -v -- '-----' \
+            | tr -d '[:space:]' \
+            | base64 --decode > "$KEYSTORE_FILE"
+          chmod 600 "$KEYSTORE_FILE"
+
+          SIZE=$(wc -c < "$KEYSTORE_FILE")
+          echo "decoded keystore: $SIZE bytes"
+          if [ "$SIZE" -lt 100 ]; then
+            echo "::error::The decoded keystore is only $SIZE bytes. KEYSTORE_BASE64 is truncated or is not base64."
+            echo "Regenerate it (PowerShell, one line, no trailing newline):"
+            echo '  [Convert]::ToBase64String([IO.File]::ReadAllBytes("dawasafe-new.jks")) | Set-Content -NoNewline b64.txt'
+            echo "Linux/macOS:  base64 -w0 dawasafe-new.jks > b64.txt"
+            exit 1
+          fi
+
+          # feedfeed = JKS, 3082 = PKCS#12. Anything else is not a keystore and
+          # the message should say that rather than "invalid password".
+          MAGIC=$(od -An -tx1 -N4 "$KEYSTORE_FILE" | tr -d ' \n')
+          case "$MAGIC" in
+            feedfeed) echo "format: JKS" ;;
+            3082*)    echo "format: PKCS#12" ;;
+            *)        echo "::error::Decoded file is not a keystore (first bytes: $MAGIC). KEYSTORE_BASE64 probably holds the wrong file."; exit 1 ;;
+          esac
+
+          # keytool writes the interesting part ("Alias <x> does not exist",
+          # "password was incorrect") to STDOUT rather than stderr, so both
+          # streams go to a log in RUNNER_TEMP - shown only on failure, because
+          # keytool also prints a harmless JKS-format warning when all is well.
+          LOG="$RUNNER_TEMP/keytool.log"
+
+          # -list proves two of the four secrets: the store opens with
+          # KEYSTORE_PASSWORD, and KEY_ALIAS exists inside it.
+          if ! keytool -list -keystore "$KEYSTORE_FILE" \
+                       -storepass "$KEYSTORE_PASSWORD" \
+                       -alias "$KEY_ALIAS" > "$LOG" 2>&1; then
+            if grep -qi 'does not exist' "$LOG"; then
+              echo "::error::KEY_ALIAS is wrong - there is no alias by that name in this keystore."
+              echo "See the real aliases with:  keytool -list -keystore dawasafe-new.jks"
+            elif grep -qiE 'password was incorrect|tampered' "$LOG"; then
+              echo "::error::KEYSTORE_PASSWORD is wrong for this keystore."
+            else
+              echo "::error::Cannot read the keystore."
+            fi
+            # keytool's own text is safe to show: it names the alias, never a password.
+            sed 's/^/keytool: /' "$LOG" || true
+            echo "Rotating a key changes all four secrets together: if KEYSTORE_BASE64 now"
+            echo "holds a NEW keystore, the alias and both passwords must be updated too."
+            exit 1
+          fi
+
+          # -list never touches the private key, so it cannot see a wrong
+          # KEY_PASSWORD. -certreq has to recover the key to build a request, so
+          # it can - and it only writes a CSR to stdout, changing nothing in the
+          # store. Without this the third secret goes unchecked until the Gradle
+          # signing task fails minutes later with UnrecoverableKeyException.
+          if ! keytool -certreq -keystore "$KEYSTORE_FILE" \
+                       -storepass "$KEYSTORE_PASSWORD" \
+                       -alias "$KEY_ALIAS" \
+                       -keypass "$KEY_PASSWORD" > "$LOG" 2>&1; then
+            echo "::error::KEY_PASSWORD is wrong - the store opens and the alias exists, but the private key cannot be recovered."
+            echo "(On a PKCS#12 keystore the key password must equal the store password.)"
+            sed 's/^/keytool: /' "$LOG" || true
+            exit 1
+          fi
+          rm -f "$LOG"
+          echo "all four secrets check out: store opens, alias exists, private key recovers"
+
+      # The three passwords/alias are scoped to THIS step only - no other step
+      # needs them, and a secret that is not in the environment cannot be leaked
+      # by something else that happens to dump the environment. KEYSTORE_FILE
+      # arrives from the previous step via GITHUB_ENV; app/build.gradle reads
+      # all four and refuses to build if only some are present.
       - name: Build release APK
+        env:
+          KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
+          KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
         run: gradle assembleRelease --no-daemon --stacktrace
+
+      # Without the key, Gradle silently produces app-release-UNSIGNED.apk
+      # instead of failing - an APK that no phone will install. Check that the
+      # signed file exists and that its signature actually verifies, so a
+      # broken-signing run goes red here instead of uploading a download that
+      # fails on the phone with "App not installed".
+      - name: Verify the APK is signed
+        run: |
+          set -euo pipefail
+          ls -la app/build/outputs/apk/release/
+
+          APK=app/build/outputs/apk/release/app-release.apk
+          if [ ! -f "$APK" ]; then
+            echo "::error::$APK was not produced."
+            if [ -f app/build/outputs/apk/release/app-release-unsigned.apk ]; then
+              echo "::error::Found app-release-unsigned.apk instead: Gradle got no signing key, so the release build was left unsigned. This APK cannot be installed."
+            fi
+            exit 1
+          fi
+
+          APKSIGNER=$(ls "${ANDROID_HOME:-${ANDROID_SDK_ROOT:-/usr/local/lib/android/sdk}}"/build-tools/*/apksigner 2>/dev/null | sort -V | tail -1 || true)
+          FINGERPRINT="not checked (apksigner not on the runner)"
+          if [ -n "$APKSIGNER" ]; then
+            # --min-sdk-version 21 so the check is made against the oldest phone
+            # this app supports, not against apksigner's default.
+            "$APKSIGNER" verify --min-sdk-version 21 --print-certs "$APK" | tee "$RUNNER_TEMP/signer.txt"
+            FINGERPRINT=$(grep -i 'SHA-256 digest' "$RUNNER_TEMP/signer.txt" | head -1 | sed 's/.*digest: *//')
+            echo "signature verifies"
+          else
+            echo "::warning::apksigner not found on the runner; skipped signature verification (the signed APK exists, which is the main thing)."
+          fi
+
+          # On the run page, not just buried in the log: the fingerprint of the
+          # certificate this APK was actually signed with, and the one-time
+          # consequence of the rotation. Worth recording somewhere safe - if it
+          # ever changes again without you rotating on purpose, something is wrong.
+          {
+            echo "### DawaSafe APK — build ${{ github.run_number }}"
+            echo
+            echo "Signed with the rotated key (dawasafe-new.jks), supplied from repository secrets."
+            echo
+            echo "- certificate SHA-256: \`${FINGERPRINT}\`"
+            echo
+            echo "**First install after the rotation:** the previously installed DawaSafe was"
+            echo "signed with a different certificate, so this APK will not install over it —"
+            echo "Android reports \`INSTALL_FAILED_UPDATE_INCOMPATIBLE\`. Export your medicine"
+            echo "list from the old app first, then uninstall it, then install this APK."
+            echo "Every build after this one updates in place as normal."
+          } >> "$GITHUB_STEP_SUMMARY"
 
       # Named with the run number so successive downloads do not all land in
       # the Downloads folder as index (1).apk, index (2).apk ...
       - name: Rename the APK
         run: |
           SRC=app/build/outputs/apk/release/app-release.apk
-          ls -la app/build/outputs/apk/release/
           cp "$SRC" "DawaSafe-v8.0-build${{ github.run_number }}.apk"
 
       - name: Upload the APK
@@ -87,3 +300,16 @@ jobs:
           path: DawaSafe-v8.0-build${{ github.run_number }}.apk
           if-no-files-found: error
           retention-days: 90
+
+      # Belt and braces: the runner is thrown away after the job, so this is not
+      # load-bearing. It costs one line and it means the key is not sitting on
+      # disk during however long the artifact upload takes, or if a later step
+      # is ever added below. Runs even when an earlier step failed, hence the
+      # :- guard - KEYSTORE_FILE is unset if the decode step never got that far.
+      - name: Remove the keystore
+        if: always()
+        run: |
+          F="${KEYSTORE_FILE:-$RUNNER_TEMP/dawasafe-new.jks}"
+          [ -f "$F" ] || { echo "nothing to remove"; exit 0; }
+          shred -u "$F" 2>/dev/null || rm -f "$F"
+          echo "keystore removed"
