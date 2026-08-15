@@ -11585,5 +11585,52 @@ textarea:focus, [tabindex]:focus, summary:focus {
 
 
 
+
+<style>
+/* ===========================================================================
+   DawaSafe layout fix pack v11.0 — reminder card head
+   ---------------------------------------------------------------------------
+   Fixes: on the Reminders screen the medicine name broke one letter per line
+   in a ~50px column, and the dose/status/schedule stacked underneath it.
+
+   Cause (two rules combining, both pre-existing):
+     a) .remhead is display:flex + flex-wrap:wrap (line 465). The v10 pack added
+        two more flex children to it — the "Reminder on" label (.ds10sw, which
+        holds min-width:5.2rem) and the Delete button. The name+schedule wrapper
+        only ever carried an inline style="flex:1", i.e. flex-basis:0, and
+        line 662's `.remhead > * {min-width:0}` lets it shrink without limit.
+        On a ~290px card the switch (46px) + label (93.6px) + bell + three .6rem
+        gaps eat ~193px before the name is given anything.
+     b) line 667 gives .medname/.medsub `overflow-wrap:anywhere`, which breaks
+        between ANY two letters and reports a one-character min-content width —
+        so the flex layout sees no reason to keep the box wide.
+
+   Both rules were added on purpose (they stop long brand names overflowing on
+   small screens), so this block does not remove them — it scopes saner values
+   to the reminder card only. Nothing outside .remcard changes.
+   =========================================================================== */
+
+/* 1. Give the name+schedule wrapper a real flex-basis.
+      - Wide card: 14rem fits beside the switch, so the original side-by-side
+        layout is kept.
+      - Phone / html.big large-text mode: 14rem does not fit, so the wrapper
+        wraps onto its own line and flex-grow takes it to the full card width.
+      - flex-shrink stays 1 and min-width stays 0, so on a very narrow card it
+        still shrinks rather than overflowing horizontally.
+      !important is required: it is competing with an inline style attribute. */
+.remcard .remhead > div{
+  flex: 1 1 14rem !important;
+}
+
+/* 2. Wrap at word boundaries, not between letters.
+      break-word breaks a word only when it cannot fit on a line by itself,
+      which is the behaviour wanted for "Fosdenoperin (Injectable)", and it
+      also restores a sane min-content width so (1) cannot be undone. */
+.remcard .medname,
+.remcard .medsub{
+  overflow-wrap: break-word;
+  word-break: normal;
+}
+</style>
 </body>
 </html>
