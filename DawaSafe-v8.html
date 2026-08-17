@@ -11632,5 +11632,1766 @@ textarea:focus, [tabindex]:focus, summary:focus {
   word-break: normal;
 }
 </style>
+<style>
+/* ===========================================================================
+   DawaSafe home dashboard pack v12.0 — styles
+   Purely additive. Everything is scoped under #view-home, except two
+   defensive rules for the tab bar which now carries a seventh button.
+
+   Two lessons from v11 are applied throughout: every flex child that holds
+   text is given a REAL flex-basis (never 0), and text elements set
+   `overflow-wrap:break-word; word-break:normal` so nothing can be handed a
+   one-character min-content width and collapse into a vertical column.
+   No min() / clamp() — this has to render on WebView 79.
+   =========================================================================== */
+
+/* ---- greeting ----------------------------------------------------------- */
+#view-home .ds12greet{ margin-bottom:1rem; }
+#view-home .pagetitle,
+#view-home .pagesub{ overflow-wrap:break-word; word-break:normal; }
+
+/* ---- safety status card ------------------------------------------------- */
+#view-home .ds12status{ border-width:2px; }
+#view-home .ds12sthead{
+  display:flex; align-items:center; gap:.5rem; flex-wrap:wrap; margin-bottom:.75rem;
+}
+#view-home .ds12sthead h3{
+  font-family:var(--font-head); font-size:1.05rem; font-weight:800;
+  flex:1 1 8rem; min-width:0; overflow-wrap:break-word; word-break:normal;
+}
+#view-home .ds12pill{
+  flex:0 0 auto; font-size:.7rem; font-weight:800; letter-spacing:.03em;
+  text-transform:uppercase; padding:.15rem .55rem; border-radius:999px;
+  background:var(--red-bg); color:var(--red-ink); border:1.5px solid var(--red-line);
+}
+#view-home .ds12stbody{ display:flex; align-items:center; gap:.9rem; flex-wrap:wrap; }
+#view-home .ds12num{
+  flex:0 0 auto; min-width:3.6rem; text-align:center;
+  font-family:var(--font-head); font-size:2.5rem; font-weight:800; line-height:1.15;
+  padding:.3rem .55rem; border-radius:12px;
+}
+#view-home .ds12stmain{
+  flex:1 1 10rem; min-width:0;
+}
+#view-home .ds12sth{
+  display:block; font-size:1.1rem; font-weight:800; line-height:1.35;
+  overflow-wrap:break-word; word-break:normal;
+}
+#view-home .ds12sts{
+  display:block; color:var(--ink-soft); font-size:.9rem;
+  overflow-wrap:break-word; word-break:normal;
+}
+#view-home .ds12cover{
+  margin-top:.8rem; font-size:.86rem; color:var(--ink-soft);
+  overflow-wrap:break-word; word-break:normal;
+}
+#view-home .ds12minor{ margin-top:.35rem; font-size:.84rem; color:var(--ink-soft); }
+#view-home .ds12limits{
+  margin-top:.5rem; padding-top:.5rem; border-top:1px solid var(--line);
+  font-size:.8rem; color:var(--ink-soft); max-width:62ch;
+  overflow-wrap:break-word; word-break:normal;
+}
+#view-home .ds12act{ margin-top:.9rem; }
+
+#view-home .ds12ok{ border-color:var(--mint-line); }
+#view-home .ds12ok .ds12num{ background:var(--mint); color:var(--green-deep); }
+#view-home .ds12warn{ border-color:var(--amber-line); }
+#view-home .ds12warn .ds12num{ background:var(--amber-bg); color:var(--amber-ink); }
+#view-home .ds12alert{ border-color:var(--red-line); }
+#view-home .ds12alert .ds12num{ background:var(--red-bg); color:var(--red-ink); }
+#view-home .ds12empty .ds12num{ background:var(--mint); color:var(--ink-soft); }
+
+/* ---- stat tiles --------------------------------------------------------- */
+#view-home .ds12tiles{ display:flex; flex-wrap:wrap; gap:.6rem; margin:1rem 0; }
+#view-home .ds12tile{
+  flex:1 1 6.5rem; min-width:0;
+  display:block; text-align:left; min-height:48px;
+  background:var(--card); border:1.5px solid var(--line); border-radius:12px;
+  padding:.6rem .7rem; color:inherit; font-size:1rem;
+}
+#view-home .ds12tile:hover{ border-color:var(--mint-line); background:var(--mint); }
+#view-home .ds12ticon{ font-size:1.05rem; line-height:1; }
+#view-home .ds12tval{
+  display:block; font-family:var(--font-head); font-size:1.45rem;
+  font-weight:800; line-height:1.25;
+}
+#view-home .ds12tlab{
+  display:block; font-size:.76rem; color:var(--ink-soft); line-height:1.3;
+  overflow-wrap:break-word; word-break:normal;
+}
+
+/* ---- today's medicines -------------------------------------------------- */
+#view-home .ds12today h3{
+  font-family:var(--font-head); font-size:1.05rem; font-weight:800; margin-bottom:.5rem;
+}
+#view-home .ds12dose{
+  display:flex; align-items:center; gap:.6rem; flex-wrap:wrap;
+  padding:.55rem 0; border-top:1px solid var(--line);
+}
+#view-home .ds12dose.first{ border-top:0; padding-top:.1rem; }
+#view-home .ds12tm{
+  flex:0 0 auto; font-family:var(--font-mono); font-size:.88rem; color:var(--ink-soft);
+}
+#view-home .ds12mk{
+  flex:0 0 1.7rem; width:1.7rem; height:1.7rem; border-radius:50%;
+  display:inline-flex; align-items:center; justify-content:center;
+  font-size:.85rem; background:var(--mint); color:var(--green-deep);
+}
+#view-home .ds12dn{
+  flex:1 1 8rem; min-width:0; font-weight:700;
+  overflow-wrap:break-word; word-break:normal;
+}
+#view-home .ds12ds{ flex:0 0 auto; font-size:.76rem; color:var(--ink-soft); }
+#view-home .st-missed .ds12mk{ background:var(--red-bg); color:var(--red-ink); }
+#view-home .st-due .ds12mk{ background:var(--amber-bg); color:var(--amber-ink); }
+#view-home .st-upcoming .ds12mk{
+  background:var(--card); border:1.5px solid var(--line); color:var(--ink-soft);
+}
+#view-home .st-skipped .ds12mk,
+#view-home .st-snoozed .ds12mk{ background:var(--blue-bg); color:var(--blue-ink); }
+#view-home .ds12more{ margin-top:.6rem; }
+
+/* ---- tab bar now has 7 buttons ------------------------------------------
+   Labels are long in every language ("Check interactions",
+   "ಇಂಟರ್ಯಾಕ್ಷನ್ ಪರಿಶೀಲಿಸಿ"), so they must be allowed to wrap onto a second
+   line at word boundaries rather than be squeezed or broken mid-word. The
+   bar simply gets taller, which keeps the text legible — shrinking the font
+   below .62rem would not be readable for the people this app is for. */
+@media (max-width:820px){
+  .tabbar .navbtn{ min-width:0; }
+  .tabbar .navbtn span{
+    overflow-wrap:break-word; word-break:normal; hyphens:none; text-align:center;
+  }
+}
+</style>
+<script>
+/* ===========================================================================
+   DawaSafe home dashboard pack v12.0
+   ---------------------------------------------------------------------------
+   Adds a Home view that opens on launch and summarises: who the profile is,
+   what the interaction engine finds across the medicines actually saved in
+   that profile, and what is due today.
+
+   SAFETY POSITION — read before changing anything here.
+   The requested mockup had a big "92 / SAFE TODAY". This block deliberately
+   does not do that. The app cannot know whether a person is safe: it only
+   knows the medicines they typed in, and its interaction table is a curated
+   subset. A reassuring score would quiet exactly the person who should be
+   ringing their doctor. So:
+     * the big figure is a COUNT OF FINDINGS, never a score, and it is
+       labelled as such;
+     * the word "safe" is never asserted — the best case reads "No known
+       interactions found";
+     * the card ALWAYS states how many medicines could not be checked, so a
+       zero is never mistaken for a clean bill of health;
+     * a permanent limits line says the app cannot tell you that you are safe.
+   No medical fact is generated here. Every number is derived from the user's
+   own data and the existing curated engine.
+
+   INVARIANT B (from v10) is respected: a saved "cm_" id is NEVER put into a
+   list that analyse() pairs by curated id, because analyse() looks pairs up in
+   INTERX and an id it has never seen produces silence, not a warning. Saved
+   records are expanded into their active ingredients with itemsFor().
+   state.checkList is not read and not written — analyse() is pure with respect
+   to it, so the dashboard analyses its own locally built list.
+
+   ES5 only, as with every pack in this file: var, no arrow functions, no
+   template literals, no ??, no Object.assign, no Array#includes.
+   =========================================================================== */
+(function(){
+  if(window.DS_HOME12) return;
+  try{
+
+  /* ---- i18n (never clobbers an existing key) ----------------------------- */
+  function add(dst, src){
+    if(!dst) return;
+    for(var k in src){
+      if(Object.prototype.hasOwnProperty.call(src,k) && !(k in dst)) dst[k] = src[k];
+    }
+  }
+  add(I18N.en, {
+    ds12_nav_home:"Home",
+    ds12_hi_morning:"Good morning", ds12_hi_afternoon:"Good afternoon", ds12_hi_evening:"Good evening",
+    ds12_sub:"Here's your medication safety overview",
+    ds12_st_title:"Medicine safety",
+    ds12_major_pill:"Major",
+    ds12_st_empty_h:"Nothing to check yet",
+    ds12_st_empty_b:"Add the medicines you take and DawaSafe will look for interactions between them.",
+    ds12_st_none_h:"No known interactions found",
+    ds12_st_none_b:"among the {n} medicines in your list",
+    ds12_st_some_h1:"1 thing to check",
+    ds12_st_some_h:"{n} things to check",
+    ds12_cover_all:"All {n} were matched to the curated database.",
+    ds12_cover_part:"{k} of your {n} medicines could not be checked — they are not in the curated database.",
+    ds12_cover_none:"None of your medicines could be checked against the curated database.",
+    ds12_minor:"Also {n} minor interaction(s) — see the full check.",
+    ds12_limits:"DawaSafe only knows the medicines you have added, and its database does not cover every interaction, so it cannot tell you that you are safe. Keep telling your doctor and pharmacist everything you take.",
+    ds12_open_check:"Open the full check",
+    ds12_add_meds:"Add your medicines",
+    ds12_t_meds:"Medicines", ds12_t_up:"Still due today", ds12_t_alerts:"To check",
+    ds12_t_adh:"Doses taken", ds12_adh_thin:"Needs a few days", ds12_adh_sub:"last 7 days",
+    ds12_today:"Today's medicines",
+    ds12_today_none:"No reminders are set for today.",
+    ds12_today_set:"Set reminders",
+    ds12_manage:"Open reminders",
+    ds12_more:"{n} more — see Reminders",
+    ds12_s_taken:"Taken", ds12_s_due:"Due now", ds12_s_missed:"Missed",
+    ds12_s_skipped:"Skipped", ds12_s_snoozed:"Snoozed", ds12_s_upcoming:"Upcoming"
+  });
+  add(I18N.hi, {
+    ds12_nav_home:"होम",
+    ds12_hi_morning:"सुप्रभात", ds12_hi_afternoon:"नमस्कार", ds12_hi_evening:"शुभ संध्या",
+    ds12_sub:"आपकी दवा सुरक्षा का सार",
+    ds12_st_title:"दवा सुरक्षा",
+    ds12_major_pill:"गंभीर",
+    ds12_st_empty_h:"अभी जाँचने के लिए कुछ नहीं",
+    ds12_st_empty_b:"जो दवाएँ आप लेते हैं उन्हें जोड़ें, फिर DawaSafe उनके बीच इंटरैक्शन खोजेगा।",
+    ds12_st_none_h:"कोई ज्ञात इंटरैक्शन नहीं मिला",
+    ds12_st_none_b:"आपकी सूची की {n} दवाओं में",
+    ds12_st_some_h1:"1 बात जाँचनी है",
+    ds12_st_some_h:"{n} बातें जाँचनी हैं",
+    ds12_cover_all:"सभी {n} जाँची-परखी सूची से मिल गईं।",
+    ds12_cover_part:"आपकी {n} दवाओं में से {k} जाँची नहीं जा सकीं — वे जाँची-परखी सूची में नहीं हैं।",
+    ds12_cover_none:"आपकी कोई भी दवा जाँची-परखी सूची से मिलान नहीं हो सकी।",
+    ds12_minor:"इसके अलावा {n} हल्के इंटरैक्शन — पूरी जाँच में देखें।",
+    ds12_limits:"DawaSafe को केवल वही दवाएँ पता हैं जो आपने जोड़ी हैं, और इसकी सूची हर इंटरैक्शन को नहीं ढकती, इसलिए यह नहीं बता सकता कि आप सुरक्षित हैं। जो कुछ आप लेते हैं, अपने डॉक्टर और फार्मासिस्ट को बताते रहें।",
+    ds12_open_check:"पूरी जाँच खोलें",
+    ds12_add_meds:"अपनी दवाएँ जोड़ें",
+    ds12_t_meds:"दवाएँ", ds12_t_up:"आज बाकी", ds12_t_alerts:"जाँचने हैं",
+    ds12_t_adh:"ली गई खुराक", ds12_adh_thin:"कुछ दिन बाद", ds12_adh_sub:"पिछले 7 दिन",
+    ds12_today:"आज की दवाएँ",
+    ds12_today_none:"आज के लिए कोई रिमाइंडर नहीं है।",
+    ds12_today_set:"रिमाइंडर लगाएँ",
+    ds12_manage:"रिमाइंडर खोलें",
+    ds12_more:"और {n} — रिमाइंडर में देखें",
+    ds12_s_taken:"ले ली", ds12_s_due:"अब लेनी है", ds12_s_missed:"छूट गई",
+    ds12_s_skipped:"छोड़ दी", ds12_s_snoozed:"स्नूज़", ds12_s_upcoming:"आगे"
+  });
+  add(I18N.kn, {
+    ds12_nav_home:"ಮುಖಪುಟ",
+    ds12_hi_morning:"ಶುಭೋದಯ", ds12_hi_afternoon:"ಶುಭ ಮಧ್ಯಾಹ್ನ", ds12_hi_evening:"ಶುಭ ಸಂಜೆ",
+    ds12_sub:"ನಿಮ್ಮ ಔಷಧ ಸುರಕ್ಷತೆಯ ಸಾರಾಂಶ",
+    ds12_st_title:"ಔಷಧ ಸುರಕ್ಷತೆ",
+    ds12_major_pill:"ಗಂಭೀರ",
+    ds12_st_empty_h:"ಪರಿಶೀಲಿಸಲು ಇನ್ನೂ ಏನೂ ಇಲ್ಲ",
+    ds12_st_empty_b:"ನೀವು ತೆಗೆದುಕೊಳ್ಳುವ ಔಷಧಗಳನ್ನು ಸೇರಿಸಿ, ನಂತರ DawaSafe ಅವುಗಳ ನಡುವಿನ ಇಂಟರ್ಯಾಕ್ಷನ್‌ಗಳನ್ನು ಹುಡುಕುತ್ತದೆ.",
+    ds12_st_none_h:"ತಿಳಿದಿರುವ ಯಾವುದೇ ಇಂಟರ್ಯಾಕ್ಷನ್ ಸಿಗಲಿಲ್ಲ",
+    ds12_st_none_b:"ನಿಮ್ಮ ಪಟ್ಟಿಯ {n} ಔಷಧಗಳಲ್ಲಿ",
+    ds12_st_some_h1:"1 ವಿಷಯ ಪರಿಶೀಲಿಸಬೇಕು",
+    ds12_st_some_h:"{n} ವಿಷಯಗಳನ್ನು ಪರಿಶೀಲಿಸಬೇಕು",
+    ds12_cover_all:"ಎಲ್ಲಾ {n} ಪರಿಶೀಲಿತ ಪಟ್ಟಿಗೆ ಹೊಂದಿಕೆಯಾದವು.",
+    ds12_cover_part:"ನಿಮ್ಮ {n} ಔಷಧಗಳಲ್ಲಿ {k} ಪರಿಶೀಲಿಸಲಾಗಲಿಲ್ಲ — ಅವು ಪರಿಶೀಲಿತ ಪಟ್ಟಿಯಲ್ಲಿ ಇಲ್ಲ.",
+    ds12_cover_none:"ನಿಮ್ಮ ಯಾವುದೇ ಔಷಧವನ್ನು ಪರಿಶೀಲಿತ ಪಟ್ಟಿಯೊಂದಿಗೆ ಪರಿಶೀಲಿಸಲಾಗಲಿಲ್ಲ.",
+    ds12_minor:"ಇದರ ಜೊತೆಗೆ {n} ಸಣ್ಣ ಇಂಟರ್ಯಾಕ್ಷನ್ — ಪೂರ್ಣ ಪರಿಶೀಲನೆಯಲ್ಲಿ ನೋಡಿ.",
+    ds12_limits:"DawaSafe ಗೆ ನೀವು ಸೇರಿಸಿದ ಔಷಧಗಳು ಮಾತ್ರ ಗೊತ್ತು, ಮತ್ತು ಅದರ ಪಟ್ಟಿ ಎಲ್ಲಾ ಇಂಟರ್ಯಾಕ್ಷನ್‌ಗಳನ್ನು ಒಳಗೊಂಡಿಲ್ಲ, ಆದ್ದರಿಂದ ನೀವು ಸುರಕ್ಷಿತ ಎಂದು ಅದು ಹೇಳಲಾರದು. ನೀವು ತೆಗೆದುಕೊಳ್ಳುವ ಎಲ್ಲವನ್ನೂ ವೈದ್ಯರಿಗೆ ಮತ್ತು ಔಷಧಿಕಾರರಿಗೆ ತಿಳಿಸುತ್ತಿರಿ.",
+    ds12_open_check:"ಪೂರ್ಣ ಪರಿಶೀಲನೆ ತೆರೆಯಿರಿ",
+    ds12_add_meds:"ನಿಮ್ಮ ಔಷಧಗಳನ್ನು ಸೇರಿಸಿ",
+    ds12_t_meds:"ಔಷಧಗಳು", ds12_t_up:"ಇಂದು ಬಾಕಿ", ds12_t_alerts:"ಪರಿಶೀಲಿಸಬೇಕು",
+    ds12_t_adh:"ತೆಗೆದ ಡೋಸ್", ds12_adh_thin:"ಕೆಲವು ದಿನ ಬೇಕು", ds12_adh_sub:"ಕಳೆದ 7 ದಿನ",
+    ds12_today:"ಇಂದಿನ ಔಷಧಗಳು",
+    ds12_today_none:"ಇಂದಿಗೆ ಯಾವುದೇ ರಿಮೈಂಡರ್ ಇಲ್ಲ.",
+    ds12_today_set:"ರಿಮೈಂಡರ್ ಹೊಂದಿಸಿ",
+    ds12_manage:"ರಿಮೈಂಡರ್ ತೆರೆಯಿರಿ",
+    ds12_more:"ಇನ್ನೂ {n} — ರಿಮೈಂಡರ್‌ನಲ್ಲಿ ನೋಡಿ",
+    ds12_s_taken:"ತೆಗೆದುಕೊಂಡಿದೆ", ds12_s_due:"ಈಗ ತೆಗೆದುಕೊಳ್ಳಿ", ds12_s_missed:"ತಪ್ಪಿದೆ",
+    ds12_s_skipped:"ಬಿಟ್ಟಿದೆ", ds12_s_snoozed:"ಸ್ನೂಜ್", ds12_s_upcoming:"ಮುಂದೆ"
+  });
+
+  function T(k){ try{ return t(k); }catch(e){ return k; } }
+  function TV(k, vars){
+    var s = T(k), n;
+    for(n in vars){
+      if(Object.prototype.hasOwnProperty.call(vars,n)) s = s.split("{"+n+"}").join(String(vars[n]));
+    }
+    return s;
+  }
+  function E(s){ try{ return esc(s); }catch(e){ return ""; } }
+  function REG(){ return window.DS_MYMEDS10 || null; }
+
+  /* ---- names ------------------------------------------------------------- */
+  function nameOf(id){
+    var m = null, reg = REG(), r;
+    try{ m = byId(id); }catch(e){}
+    if(m && m.generic) return m.generic;
+    if(reg && reg.isSaved && reg.isSaved(id)){
+      r = reg.recOf(id);
+      if(r && reg.dispName) return reg.dispName(r);
+    }
+    return String(id);
+  }
+
+  /* ---- build the analysis list from the profile's SAVED medicines --------
+     Curated ids go in as ids. Saved (cm_) records are expanded into their
+     active ingredients via itemsFor(), which carries prov[] so the
+     duplicate-ingredient check still works. A cm_ id is never passed through
+     as an id — see INVARIANT B in the header. */
+  function listFor(p){
+    var out = [], seen = {}, i, j, id, reg = REG(), rec, items, key;
+    if(!p || !p.meds) return out;
+    for(i=0;i<p.meds.length;i++){
+      id = p.meds[i];
+      if(!id) continue;
+      if(reg && reg.isSaved && reg.isSaved(id)){
+        rec = reg.recOf ? reg.recOf(id) : null;
+        items = (rec && reg.itemsFor) ? reg.itemsFor(rec) : null;
+        if(items && items.length){
+          for(j=0;j<items.length;j++) push(out, seen, items[j]);
+          continue;
+        }
+        /* saved but not expandable: its active ingredient is genuinely
+           unknown, so it goes in under its own name and is counted as
+           "could not be checked" rather than silently paired by id. */
+        push(out, seen, { custom: (rec && reg.dispName) ? reg.dispName(rec) : String(id) });
+        continue;
+      }
+      push(out, seen, { id: id });
+    }
+    return out;
+
+    function push(arr, mem, it){
+      if(!it) return;
+      key = it.id ? ("i:"+it.id) : ("c:"+String(it.custom||"").toLowerCase());
+      if(key === "i:" || key === "c:") return;
+      if(mem[key]) return;                 /* same thing listed twice */
+      mem[key] = 1;
+      arr.push(it);
+    }
+  }
+
+  /* Can this ONE medicine be checked at all? Counting has to happen per
+     medicine, not per item: a combination product expands into several active
+     ingredients, and saying "among the 3 medicines in your list" when the
+     person has one strip in their hand would be wrong. */
+  function medIsCheckable(id){
+    var reg = REG(), rec, items, j;
+    if(!id) return false;
+    if(reg && reg.isSaved && reg.isSaved(id)){
+      rec = reg.recOf ? reg.recOf(id) : null;
+      items = (rec && reg.itemsFor) ? reg.itemsFor(rec) : null;
+      if(!items) return false;
+      for(j=0;j<items.length;j++){ if(items[j] && items[j].id) return true; }
+      return false;                  /* saved, but no curated active ingredient */
+    }
+    try{ return !!byId(id); }catch(e){ return false; }
+  }
+
+  /* ---- run the curated engine over that list ----------------------------- */
+  function scan(p){
+    var res = { n:0, checked:0, unchecked:0, major:0, mod:0, minor:0, findings:[], ran:false },
+        list, an, i, pr, sev, d, ah, ch, bz;
+    res.n = (p && p.meds) ? p.meds.length : 0;
+    for(i=0;i<res.n;i++){ if(medIsCheckable(p.meds[i])) res.checked++; else res.unchecked++; }
+    list = listFor(p);
+    if(!list.length) return res;
+    if(typeof window.analyse !== "function") return res;
+    try{ an = window.analyse(list, p); }catch(e){ return res; }
+    if(!an) return res;
+    res.ran = true;
+
+    /* interactions — rec is null for a pair with no known interaction, so a
+       returned pair is NOT by itself a finding. */
+    for(i=0;i<(an.pairs||[]).length;i++){
+      pr = an.pairs[i];
+      if(!pr || !pr.rec) continue;
+      sev = pr.rec.sev;
+      if(sev === "major"){ res.major++; res.findings.push({r:0, txt:nameOf(pr.a)+" + "+nameOf(pr.b)}); }
+      else if(sev === "moderate"){ res.mod++; res.findings.push({r:1, txt:nameOf(pr.a)+" + "+nameOf(pr.b)}); }
+      else res.minor++;
+    }
+    /* duplicate therapy / duplicate active ingredient — a real double-dose
+       risk. Advisory-only entries are informational and are not counted. */
+    for(i=0;i<(an.dups||[]).length;i++){
+      d = an.dups[i];
+      if(!d || d.advisory) continue;
+      res.mod++;
+      res.findings.push({r:1, txt:String(d.name||"")+(d.meds&&d.meds.length?(": "+d.meds.join(", ")):"")});
+    }
+    /* an allergy hit is always serious */
+    for(i=0;i<(an.allergyHits||[]).length;i++){
+      ah = an.allergyHits[i];
+      if(!ah) continue;
+      res.major++;
+      res.findings.push({r:0, txt:String(ah.med||"")+" — "+String(ah.allergen||"")});
+    }
+    /* condition warnings carry their own severity */
+    for(i=0;i<(an.condHits||[]).length;i++){
+      ch = an.condHits[i];
+      if(!ch) continue;
+      if(ch.sev === "major"){ res.major++; res.findings.push({r:0, txt:String(ch.med||"")+" — "+String(ch.cond||"")}); }
+      else if(ch.sev === "moderate"){ res.mod++; res.findings.push({r:1, txt:String(ch.med||"")+" — "+String(ch.cond||"")}); }
+      else res.minor++;
+    }
+    /* Beers flags for a profile marked 65+ */
+    for(i=0;i<(an.beers||[]).length;i++){
+      bz = an.beers[i];
+      if(!bz) continue;
+      res.mod++;
+      res.findings.push({r:1, txt:String(bz.med||"")});
+    }
+    res.findings.sort(function(a,b){ return a.r - b.r; });
+    return res;
+  }
+
+  /* ---- doses taken, last 7 days -----------------------------------------
+     Denominator counts only doses whose time has already passed, so a dose
+     due later today is never counted as a miss. Below 7 elapsed doses no
+     percentage is shown at all — "100%" off two doses would be noise
+     dressed up as information. */
+  function adherence(p){
+    var out = { pct:null, taken:0, total:0 }, now = Date.now(),
+        i, k, j, d, ds, id, r, tm, at, active;
+    if(!p || !p.meds) return out;
+    for(i=6;i>=0;i--){
+      d = new Date(); d.setDate(d.getDate()-i);
+      ds = todayStr(d);
+      for(j=0;j<p.meds.length;j++){
+        id = p.meds[j];
+        r = (p.rems||{})[id];
+        if(!r || !r.times || !r.times.length) continue;
+        active = false;
+        try{ active = remActiveOn(r, ds); }catch(e){ active = false; }
+        if(!active) continue;
+        for(k=0;k<r.times.length;k++){
+          tm = r.times[k];
+          try{ at = timeToMs(ds, tm); }catch(e){ continue; }
+          if(at > now) continue;
+          out.total++;
+          if((p.adherence||{})[doseKey(ds, id, tm)]) out.taken++;
+        }
+      }
+    }
+    if(out.total >= 7) out.pct = Math.round(out.taken * 100 / out.total);
+    return out;
+  }
+
+  var MARK = { taken:"✓", missed:"!", due:"●", skipped:"⊘", snoozed:"💤", upcoming:"○" };
+
+  function greetKey(){
+    var h = new Date().getHours();
+    if(h < 12) return "ds12_hi_morning";
+    if(h < 17) return "ds12_hi_afternoon";
+    return "ds12_hi_evening";
+  }
+
+  /* ---- render ------------------------------------------------------------ */
+  function render(){
+    var host = document.getElementById("view-home");
+    if(!host) return;
+    var p = null;
+    try{ p = prof(); }catch(e){}
+    if(!p){ host.innerHTML = ""; return; }
+
+    var sc = scan(p), alerts = sc.major + sc.mod, adh = adherence(p),
+        doses = [], upcoming = 0, i, h, cls, big, head, sub, cover, names, act, actLbl, st, cap;
+
+    try{ doses = todaysDoses(p, Date.now()) || []; }catch(e){ doses = []; }
+    for(i=0;i<doses.length;i++){
+      if(doses[i].status === "upcoming" || doses[i].status === "due") upcoming++;
+    }
+
+    /* --- status card wording. "safe" is never asserted. --- */
+    if(!sc.n){
+      cls = "ds12empty"; big = "–";
+      head = T("ds12_st_empty_h"); sub = T("ds12_st_empty_b"); cover = "";
+      act = "check"; actLbl = T("ds12_add_meds");
+    }else{
+      if(alerts === 0){
+        cls = sc.unchecked ? "ds12warn" : "ds12ok";
+        head = T("ds12_st_none_h");
+        sub = TV("ds12_st_none_b", {n: sc.checked});
+      }else{
+        cls = sc.major ? "ds12alert" : "ds12warn";
+        head = (alerts === 1) ? T("ds12_st_some_h1") : TV("ds12_st_some_h", {n: alerts});
+        names = [];
+        for(i=0;i<sc.findings.length && i<2;i++) names.push(sc.findings[i].txt);
+        sub = names.join(" · ") + (sc.findings.length > 2 ? " …" : "");
+      }
+      big = String(alerts);
+      if(!sc.checked) cover = T("ds12_cover_none");
+      else if(sc.unchecked) cover = TV("ds12_cover_part", {k: sc.unchecked, n: sc.n});
+      else cover = TV("ds12_cover_all", {n: sc.n});
+      act = "check"; actLbl = T("ds12_open_check");
+    }
+
+    h  = '<div class="ds12greet">';
+    h += '<h2 class="pagetitle">' + E(T(greetKey()) + ", " + (p.name || "")) + ' 👋</h2>';
+    h += '<p class="pagesub">' + E(T("ds12_sub")) + '</p>';
+    h += '</div>';
+
+    h += '<div class="card ds12status ' + cls + '">';
+    h += '<div class="ds12sthead"><span aria-hidden="true">🛡️</span><h3>' + E(T("ds12_st_title")) + '</h3>';
+    if(sc.major) h += '<span class="ds12pill">' + E(T("ds12_major_pill")) + '</span>';
+    h += '</div>';
+    h += '<div class="ds12stbody">';
+    h += '<div class="ds12num" aria-hidden="true">' + E(big) + '</div>';
+    h += '<div class="ds12stmain"><span class="ds12sth">' + E(head) + '</span>';
+    if(sub) h += '<span class="ds12sts">' + E(sub) + '</span>';
+    h += '</div></div>';
+    if(cover) h += '<p class="ds12cover">' + E(cover) + '</p>';
+    if(sc.minor) h += '<p class="ds12minor">' + E(TV("ds12_minor", {n: sc.minor})) + '</p>';
+    h += '<p class="ds12limits">' + E(T("ds12_limits")) + '</p>';
+    h += '<div class="ds12act"><button class="btn" onclick="go(\'' + act + '\')">' + E(actLbl) + '</button></div>';
+    h += '</div>';
+
+    h += '<div class="ds12tiles">';
+    h += tile("💊", String(sc.n), T("ds12_t_meds"), "meds");
+    h += tile("🔔", String(upcoming), T("ds12_t_up"), "schedule");
+    h += tile("⚠️", String(alerts), T("ds12_t_alerts"), "check");
+    h += tile("📈", (adh.pct === null ? "–" : (adh.pct + "%")),
+              (adh.pct === null ? T("ds12_adh_thin") : (T("ds12_t_adh") + " · " + T("ds12_adh_sub"))),
+              "schedule");
+    h += '</div>';
+
+    h += '<div class="card ds12today"><h3>' + E(T("ds12_today")) + '</h3>';
+    if(!doses.length){
+      h += '<p class="hint">' + E(T("ds12_today_none")) + '</p>';
+      h += '<div class="ds12more"><button class="btn ghost small" onclick="go(\'schedule\')">' + E(T("ds12_today_set")) + '</button></div>';
+    }else{
+      cap = doses.length > 8 ? 8 : doses.length;
+      for(i=0;i<cap;i++){
+        st = doses[i].status;
+        h += '<div class="ds12dose st-' + E(st) + (i === 0 ? " first" : "") + '">';
+        h += '<span class="ds12tm">' + E(ampm(doses[i].tm)) + '</span>';
+        h += '<span class="ds12mk" aria-hidden="true">' + (MARK[st] || "○") + '</span>';
+        h += '<span class="ds12dn">' + E(doses[i].name) + '</span>';
+        h += '<span class="ds12ds">' + E(T("ds12_s_" + st)) + '</span>';
+        h += '</div>';
+      }
+      h += '<div class="ds12more">';
+      if(doses.length > cap) h += '<p class="hint">' + E(TV("ds12_more", {n: doses.length - cap})) + '</p>';
+      h += '<button class="btn ghost small" onclick="go(\'schedule\')" style="margin-top:.5rem">' + E(T("ds12_manage")) + '</button>';
+      h += '</div>';
+    }
+    h += '</div>';
+
+    host.innerHTML = h;
+
+    function tile(icon, val, lbl, dest){
+      return '<button class="ds12tile" onclick="go(\'' + dest + '\')">' +
+             '<span class="ds12ticon" aria-hidden="true">' + icon + '</span>' +
+             '<span class="ds12tval">' + E(val) + '</span>' +
+             '<span class="ds12tlab">' + E(lbl) + '</span></button>';
+    }
+  }
+
+  /* ---- mount ------------------------------------------------------------- */
+  var HOME_ICON = '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10.5 12 3l9 7.5"/><path d="M5.5 9.3V20h13V9.3"/><path d="M9.8 20v-5.2h4.4V20"/></svg>';
+
+  function mount(){
+    var main = document.getElementById("main"), sec, before, i, found = false;
+    if(!main) return false;
+    if(!document.getElementById("view-home")){
+      sec = document.createElement("section");
+      sec.className = "view";
+      sec.id = "view-home";
+      before = document.getElementById("view-check");
+      if(before && before.parentNode === main) main.insertBefore(sec, before);
+      else main.appendChild(sec);
+    }
+    for(i=0;i<NAV.length;i++){ if(NAV[i] && NAV[i].id === "home") found = true; }
+    if(!found) NAV.unshift({ id:"home", key:"ds12_nav_home", icon:HOME_ICON });
+    return true;
+  }
+
+  if(!mount()) return;
+  RENDER.home = render;
+  try{ renderNav(); }catch(e){}
+
+  /* boot() (line 5073) has already run go("check") by the time this block
+     executes. Land on Home instead — but only if nothing has navigated away
+     since, so this never yanks the screen out from under someone. */
+  try{
+    if(typeof currentView !== "undefined" && currentView === "check") go("home");
+  }catch(e){}
+
+  /* Android hardware back: the host handler (DS_ANDROID.onBack) falls back to
+     go("check") for any non-check view. With a landing screen that should be
+     Home, and pressing back ON Home should let the host's double-press exit
+     take over rather than bouncing to Check. */
+  try{
+    if(window.DS_ANDROID && typeof DS_ANDROID.onBack === "function"){
+      var _origBack = DS_ANDROID.onBack;
+      DS_ANDROID.onBack = function(){
+        var before = (typeof currentView !== "undefined") ? currentView : null, r;
+        try{ r = _origBack.apply(this, arguments); }catch(e){ return false; }
+        try{
+          if(r === true && before !== "check" && currentView === "check"){
+            /* that was the handler's "return to the main screen" step */
+            if(before === "home"){ go("home"); return false; }
+            go("home");
+          }
+        }catch(e){}
+        return r;
+      };
+    }
+  }catch(e){}
+
+  window.DS_HOME12 = {
+    version: "12.0",
+    render: render,
+    scan: function(){ return scan(prof()); },
+    adherence: function(){ return adherence(prof()); },
+    list: function(){ return listFor(prof()); }
+  };
+
+  }catch(e){ try{ console.warn("[DawaSafe v12]", e); }catch(e2){} }
+})();
+</script>
+<style>
+/* ===========================================================================
+   DawaSafe home polish pack v13.0 — styles
+   Purely additive. Scoped to #view-home, except ONE global rule (§0) that is
+   a genuine bug fix for every view.
+
+   Carries v11's two layout lessons forward: every flex child holding text gets
+   a REAL flex-basis (never 0), and text elements set
+   `overflow-wrap:break-word; word-break:normal` so nothing is handed a
+   one-character min-content width and collapses into a vertical column.
+   No min() / clamp() / :has() / nesting — this has to render on WebView 79.
+   Colours come only from existing CSS variables, so html.dark keeps working.
+   =========================================================================== */
+
+/* --- §0 the stray outline around the greeting ------------------------------
+   v7 §6(a) wraps go() and, for accessibility, moves focus into the new view's
+   heading: `h.setAttribute("tabindex","-1"); h.focus()`. The base stylesheet's
+   bare `:focus-visible{outline:3px solid var(--focus)}` (line 52) then paints a
+   3px green ring around "Good evening, …" on every navigation.
+
+   The focus itself is correct and stays — a screen-reader user needs it. Only
+   the ring goes, and only on these headings: tabindex="-1" means they are NOT
+   tab-reachable, so no keyboard user can ever land here by their own action and
+   need to see where they are. This is the standard treatment for the
+   focus-the-heading-on-route-change pattern.
+   Specificity (0,3,1) beats the (0,1,0) of the rule it overrides.            */
+.view h2[tabindex="-1"]:focus,
+.view h3[tabindex="-1"]:focus,
+.view [role="heading"][tabindex="-1"]:focus{ outline:none; box-shadow:none; }
+
+/* --- §1 greeting ---------------------------------------------------------- */
+#view-home .ds12greet{ margin-bottom:1.25rem; }
+#view-home .ds12greet .pagetitle{ letter-spacing:-.015em; line-height:1.2; margin-bottom:.3rem; }
+#view-home .ds12greet .pagesub{ margin-bottom:0; font-size:1rem; max-width:46ch; }
+
+/* --- §2 safety status card ------------------------------------------------ */
+#view-home .ds12status{ padding:1.15rem 1.15rem 1.05rem; }
+
+/* header row: shield sits in a tinted chip, title becomes a quiet eyebrow so
+   it stops competing with the finding headline underneath it */
+#view-home .ds12sthead{ gap:.55rem; margin-bottom:.9rem; }
+#view-home .ds12sthead > span[aria-hidden]{
+  flex:0 0 auto; width:1.85rem; height:1.85rem; border-radius:50%;
+  display:inline-flex; align-items:center; justify-content:center;
+  font-size:1rem; background:var(--mint); line-height:1;
+}
+#view-home .ds12sthead h3{
+  font-size:.82rem; font-weight:700; letter-spacing:.07em; text-transform:uppercase;
+  color:var(--ink-soft); flex:1 1 8rem;
+}
+
+/* the number plate — a deliberate stat block, not a floating digit */
+#view-home .ds12stbody{ gap:1rem; align-items:flex-start; }
+#view-home .ds12num{
+  min-width:4.2rem; padding:.45rem .5rem .5rem;
+  font-size:2.9rem; line-height:1.05; border-radius:14px;
+  font-variant-numeric:tabular-nums; font-feature-settings:"tnum";
+  letter-spacing:-.02em;
+  box-shadow:inset 0 0 0 1.5px rgba(0,0,0,.06);
+}
+#view-home .ds12stmain{ padding-top:.15rem; }
+#view-home .ds12sth{ font-size:1.22rem; line-height:1.3; max-width:44ch; letter-spacing:-.01em; }
+#view-home .ds12sts{ margin-top:.2rem; font-size:.92rem; line-height:1.45; max-width:52ch; }
+
+#view-home .ds12cover{ margin-top:.85rem; font-size:.9rem; line-height:1.5; max-width:58ch; }
+#view-home .ds12minor{ margin-top:.4rem; font-size:.86rem; }
+
+/* the permanent limits line reads as a footnote, not as body copy */
+#view-home .ds12limits{
+  margin-top:.9rem; padding:.6rem 0 0 .8rem;
+  border-top:0; border-left:3px solid var(--line);
+  font-size:.82rem; line-height:1.55;
+}
+#view-home .ds12act{ margin-top:1rem; }
+
+/* --- §3 stat tiles -------------------------------------------------------- */
+#view-home .ds12tiles{ gap:.65rem; margin:1.15rem 0; align-items:stretch; }
+#view-home .ds12tile{
+  display:flex; flex-direction:column; align-items:flex-start; gap:.3rem;
+  min-height:5.6rem; padding:.7rem .75rem; border-radius:14px;
+}
+#view-home .ds12tile:active{ background:var(--mint); }
+#view-home .ds12ticon{
+  flex:0 0 auto; width:1.75rem; height:1.75rem; border-radius:50%;
+  display:inline-flex; align-items:center; justify-content:center;
+  background:var(--mint); font-size:.95rem; margin-bottom:.1rem;
+}
+#view-home .ds12tval{
+  font-size:1.6rem; line-height:1.1; letter-spacing:-.02em;
+  font-variant-numeric:tabular-nums; font-feature-settings:"tnum";
+}
+#view-home .ds12tlab{ font-size:.74rem; letter-spacing:.02em; }
+
+/* --- §4 today's medicines ------------------------------------------------- */
+#view-home .ds12today{ padding:1.15rem; }
+#view-home .ds12today h3{
+  font-size:.82rem; font-weight:700; letter-spacing:.07em; text-transform:uppercase;
+  color:var(--ink-soft); margin-bottom:.7rem;
+}
+#view-home .ds12dose{ gap:.7rem; padding:.6rem 0; }
+#view-home .ds12dose.first{ padding-top:0; }
+/* a real min-width, not a flex-basis of 0, so the times form a tidy column
+   and "10:00 PM" never wraps under "8:00 AM" */
+#view-home .ds12tm{ min-width:5rem; font-size:.86rem; font-variant-numeric:tabular-nums; }
+#view-home .ds12mk{ flex:0 0 1.6rem; width:1.6rem; height:1.6rem; font-size:.8rem; }
+#view-home .ds12dn{ font-size:1rem; line-height:1.35; }
+/* status becomes a small pill, tinted by the .st-* class already on the row */
+#view-home .ds12ds{
+  padding:.12rem .5rem; border-radius:999px; font-size:.72rem; font-weight:700;
+  letter-spacing:.02em; background:var(--card); border:1.5px solid var(--line);
+  color:var(--ink-soft); white-space:nowrap;
+}
+#view-home .st-taken .ds12ds{ background:var(--mint); border-color:var(--mint-line); color:var(--green-deep); }
+#view-home .st-missed .ds12ds{ background:var(--red-bg); border-color:var(--red-line); color:var(--red-ink); }
+#view-home .st-due .ds12ds{ background:var(--amber-bg); border-color:var(--amber-line); color:var(--amber-ink); }
+#view-home .st-skipped .ds12ds,
+#view-home .st-snoozed .ds12ds{ background:var(--blue-bg); color:var(--blue-ink); border-color:var(--blue-bg); }
+#view-home .ds12more{ margin-top:.75rem; }
+
+/* --- §5 "show more brands" block in the search suggestions ----------------
+   Not scoped to #view-home: the search box lives on the Check screen.       */
+.ds13more{ border-top:1px solid var(--line); }
+.ds13morebtn{
+  display:block; width:100%; text-align:left; min-height:48px;
+  padding:.7rem .9rem; background:transparent; border:0; color:var(--green-deep);
+  font-size:.92rem; font-weight:700; font-family:inherit;
+}
+.ds13morebtn:hover{ background:var(--mint); }
+.ds13extra[hidden]{ display:none; }
+
+/* --- §6 bottom tab bar: repair the 7th column -----------------------------
+   NAV ships six tabs and the bar was laid out for six; v12 added Home as a
+   seventh, so every column lost about a seventh of its width. The items are
+   flex:1 but never got min-width:0, so each one stayed at least as wide as its
+   longest word ("interactions"), the sum exceeded the viewport, and adjacent
+   labels ran into each other — badly at 320px and in large-text mode.
+
+   min-width:0 is the fix: it lets the seven columns divide the width evenly
+   instead of being forced apart by their content. The label then becomes a
+   full-width centred block that wraps inside its own column.
+
+   break-word is deliberate, and it is the lesser of two measured evils. I first
+   tried overflow-wrap:normal to keep every word whole; Chromium then reported
+   1 overlapping label at 360px, 3 at 320px and 5 in large-text mode, the worst
+   running 29px into its neighbour's text. Overlapping words are unreadable;
+   a word that wraps mid-way is merely untidy. So the labels are allowed to
+   break, and the render check asserts zero ink collisions instead.
+
+   This does break the long Hindi and Kannada labels ("इंटरैक्शन जाँचें",
+   "ಇಂಟರ್ಯಾಕ್ಷನ್ ಪರಿಶೀಲಿಸಿ"), which are effectively one long word each. That is
+   survivable because break-word breaks BETWEEN grapheme clusters, never inside
+   one, so no conjunct is ever cut in half. The full untruncated label is also
+   always on the button's aria-label, so a screen reader is unaffected.
+
+   The font could be shrunk far enough to avoid breaking (~.44rem / 7px fits
+   "interactions" in a 320px seventh) but 7px type on the primary navigation of
+   an app for elderly users is the wrong trade. Legible and wrapped beats tiny
+   and whole. The real fix is shorter tab labels, which needs Hindi and Kannada
+   wording I am not going to invent — flagged to the user instead.            */
+@media (max-width:820px){
+  .tabbar .navbtn{ min-width:0; padding:.4rem .1rem; }
+  .tabbar .navbtn > span{
+    display:block; width:100%; text-align:center;
+    font-size:.56rem; line-height:1.15;
+    overflow-wrap:break-word; word-break:normal; hyphens:none;
+  }
+}
+@media (max-width:360px){
+  .tabbar .navbtn > span{ font-size:.52rem; letter-spacing:-.01em; }
+}
+/* Large-text mode is where the collision was worst. The labels stay legible but
+   must not grow past their column, so they scale from the column, not the root
+   font-size the rest of that mode inflates. */
+html.big .tabbar .navbtn > span{ font-size:.6rem; line-height:1.1; }
+
+/* --- §7 reserve room for the taller bar ------------------------------------
+   §6 cures the overlap by letting labels wrap, and a wrapped label is a taller
+   bar. main reserves 5.5rem for it (99px, 115px in large-text mode) and
+   Chromium measured the bar at 103.5px in Kannada and 137.2px in Kannada with
+   large text — so the fix would have hidden the bottom of the page behind the
+   nav. That is a worse bug than the one being fixed.
+
+   8.5rem clears the tallest configuration measured (137.2px vs 178px here) in
+   every language at both 320 and 360px. The script then trims the reservation
+   to the height it actually measures, so English does not sit above ~70px of
+   dead space; this rule is the floor for the case where the script does not run
+   at all, which is the only reason it is generous rather than exact.         */
+@media (max-width:820px){
+  main{ padding-bottom:8.5rem; }
+}
+</style>
+<script>
+/* ===========================================================================
+   DawaSafe polish + search pack v13.0                                2026-08-16
+   ---------------------------------------------------------------------------
+   ADDITIVE ONLY. One IIFE, ES5 syntax, every section in its own try/catch, and
+   every wrapper keeps its arguments and the original return value (v7's lesson:
+   a wrapper that drops either breaks the next wrapper in the chain).
+
+   §1  i18n additions (en/hi/kn), never clobbering an existing key
+   §2  Home card wording — two real defects visible on screen:
+         (a) "among the 1 medicines in your list" (plural agreement)
+         (b) "No known interactions found" was shown even when NOTHING could be
+             checked, which is the most misleading sentence the app can print.
+   §3  Indian-brand search: binary-search prefix walk (was a linear scan of all
+       ~184k brands per keystroke), relevance ranking, and typo tolerance.
+   §4  "Show more Indian brands" under the suggestion list.
+   §5  DS_QA13 self-tests.
+
+   SAFETY POSITION for §3 — read before changing anything here.
+   A typo-tolerant search must never show the typed word as if it were a real
+   product. That is exactly the v9 "Lenm" harm chain: the rendered .gname text
+   is read back by the click handler into spec.label, becomes prov[].brand, and
+   ends up in the check list, duplicate-ingredient cards and reminders. So a
+   fuzzy hit is resolved for DISPLAY through the corrected index token, never
+   through the user's misspelling, and it stays amber-badged because
+   inMatchConfident() tests the raw query against the exact/first-word maps and
+   is therefore false by construction for a corrected query. No medical fact is
+   generated anywhere in this block.
+   =========================================================================== */
+(function(){
+  if(window.DS_V13) return;
+  try{
+
+  /* ---------- tiny helpers ------------------------------------------------ */
+  function has(o, k){ return !!o && Object.prototype.hasOwnProperty.call(o, k); }
+  function T(k){ try{ return t(k); }catch(e){ return k; } }
+  function TV(k, vars){
+    var s = T(k), n;
+    for(n in vars){ if(has(vars, n)) s = s.split("{"+n+"}").join(String(vars[n])); }
+    return s;
+  }
+  function E(s){
+    try{ return esc(s); }catch(e){}
+    return String(s == null ? "" : s)
+      .replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");
+  }
+  function trim(s){ return String(s == null ? "" : s).replace(/^\s+|\s+$/g, ""); }
+  function now(){ return Date.now ? Date.now() : +new Date(); }
+
+  /* ---------- §1 i18n ----------------------------------------------------- */
+  function add(dst, src){
+    if(!dst) return;
+    for(var k in src){ if(has(src, k) && !(k in dst)) dst[k] = src[k]; }
+  }
+  try{
+    add(I18N.en, {
+      ds13_among_1:"among the 1 medicine that could be checked",
+      ds13_among_n:"among the {n} medicines that could be checked",
+      ds13_unchk_h:"Could not check your medicines",
+      ds13_unchk_b:"None of them are in the curated database, so no interaction check has run.",
+      ds13_more_n:"Show {n} more Indian brands",
+      ds13_more_hide:"Hide the extra brands"
+    });
+    add(I18N.hi, {
+      ds13_among_1:"आपकी उस 1 दवा में जो जाँची जा सकी",
+      ds13_among_n:"आपकी उन {n} दवाओं में जो जाँची जा सकीं",
+      ds13_unchk_h:"आपकी दवाएँ जाँची नहीं जा सकीं",
+      ds13_unchk_b:"उनमें से कोई भी जाँची-परखी सूची में नहीं है, इसलिए कोई इंटरैक्शन जाँच नहीं हुई।",
+      ds13_more_n:"{n} और भारतीय ब्रांड दिखाएँ",
+      ds13_more_hide:"अतिरिक्त ब्रांड छिपाएँ"
+    });
+    add(I18N.kn, {
+      ds13_among_1:"ಪರಿಶೀಲಿಸಬಹುದಾದ ನಿಮ್ಮ 1 ಔಷಧದಲ್ಲಿ",
+      ds13_among_n:"ಪರಿಶೀಲಿಸಬಹುದಾದ ನಿಮ್ಮ {n} ಔಷಧಗಳಲ್ಲಿ",
+      ds13_unchk_h:"ನಿಮ್ಮ ಔಷಧಗಳನ್ನು ಪರಿಶೀಲಿಸಲಾಗಲಿಲ್ಲ",
+      ds13_unchk_b:"ಅವುಗಳಲ್ಲಿ ಯಾವುದೂ ಪರಿಶೀಲಿತ ಪಟ್ಟಿಯಲ್ಲಿ ಇಲ್ಲ, ಆದ್ದರಿಂದ ಯಾವುದೇ ಇಂಟರ್ಯಾಕ್ಷನ್ ಪರಿಶೀಲನೆ ನಡೆದಿಲ್ಲ.",
+      ds13_more_n:"ಇನ್ನೂ {n} ಭಾರತೀಯ ಬ್ರ್ಯಾಂಡ್‌ಗಳನ್ನು ತೋರಿಸಿ",
+      ds13_more_hide:"ಹೆಚ್ಚುವರಿ ಬ್ರ್ಯಾಂಡ್‌ಗಳನ್ನು ಮರೆಮಾಡಿ"
+    });
+  }catch(e){}
+
+  /* =========================================================================
+     §2 Home status-card wording
+     Post-processes the card v12 renders, using only the numbers v12 already
+     exposes through DS_HOME12.scan(). Nothing is recomputed, so the two blocks
+     can never disagree about what was found.
+     ====================================================================== */
+  function subText(n){ return (n === 1) ? T("ds13_among_1") : TV("ds13_among_n", {n:n}); }
+
+  function homeFix(){
+    var host = document.getElementById("view-home"), reg = window.DS_HOME12,
+        card, sc, alerts, hEl, sEl, nEl, p = null;
+    if(!host || !reg || typeof reg.scan !== "function") return false;
+    card = host.querySelector(".ds12status");
+    if(!card) return false;
+    /* scan(p) reads p.meds — called with no argument it reports an empty list
+       for everyone, which silently made this whole function a no-op. */
+    try{ if(typeof prof === "function") p = prof(); }catch(e){ p = null; }
+    if(!p) return false;
+    try{ sc = reg.scan(p); }catch(e){ return false; }
+    if(!sc || !sc.n) return false;                  /* empty state: v12 is right */
+    alerts = (sc.major || 0) + (sc.mod || 0);
+    if(alerts !== 0) return false;                  /* findings listed: wording fine */
+
+    hEl = card.querySelector(".ds12sth");
+    sEl = card.querySelector(".ds12sts");
+    nEl = card.querySelector(".ds12num");
+
+    if(sc.checked === 0){
+      /* Nothing was checkable, so "no known interactions found" would be a
+         claim the engine never made, and a big "0" reads as "0 problems".   */
+      if(hEl) hEl.textContent = T("ds13_unchk_h");
+      if(sEl) sEl.textContent = T("ds13_unchk_b");
+      if(nEl) nEl.textContent = "–";
+      card.classList.remove("ds12ok");
+      card.classList.add("ds12warn");
+      return true;
+    }
+    if(sEl) sEl.textContent = subText(sc.checked);
+    return true;
+  }
+
+  /* The greeting ships as E(greeting + ", " + name) + " 👋" — a SINGLE text
+     node, so the space before the hand is an ordinary break opportunity. At
+     360px and narrower the hand wrapped onto a line of its own, costing a whole
+     line of vertical space above the fold and reading like a rendering fault.
+     Welding it to the name with U+00A0 moves the wrap to after the comma, which
+     reads correctly at every width. No CSS property can protect one space
+     inside a text node, so this has to be a DOM tweak — and it must run on
+     every render, including the states where homeFix() deliberately returns
+     early, hence a separate function rather than a branch inside it. */
+  function weldEmoji(node){
+    var i, s, useData, hit = false;
+    if(!node) return false;
+    if(node.nodeType === 3){
+      /* 'data' is the canonical property on a Text node and 'nodeValue' is its
+         alias. Read whichever this DOM actually implements and write back
+         through the same one: Chromium has both, the Node harness implements
+         only 'data' and leaves nodeValue undefined - which silently turned this
+         into a no-op the first time round. */
+      useData = (typeof node.data === "string");
+      s = String(useData ? node.data : (node.nodeValue || ""));
+      /* A leading surrogate starts any emoji. The NBSP is written as an
+         escape on purpose: as a literal character it is indistinguishable
+         from a plain space on screen, and a plain space here would make this
+         a silent no-op that still reported success. */
+      if(/ [\uD800-\uDBFF]/.test(s)){
+        s = s.replace(/ ([\uD800-\uDBFF])/g, "\u00A0$1");
+        if(useData) node.data = s;
+        if(typeof node.nodeValue === "string") node.nodeValue = s;
+        return true;
+      }
+      return false;
+    }
+    for(i = 0; node.childNodes && i < node.childNodes.length; i++){
+      if(weldEmoji(node.childNodes[i])) hit = true;
+    }
+    return hit;
+  }
+
+  function greetFix(){
+    var host = document.getElementById("view-home"), h;
+    if(!host) return false;
+    h = host.querySelector(".ds12greet h2") || host.querySelector(".ds12greet");
+    if(!h) return false;
+    return weldEmoji(h);
+  }
+
+  /* --- the tab bar's real height -------------------------------------------
+     main{padding-bottom:5.5rem} reserves 99px (115px in large-text mode) for
+     the fixed bar. The §6 CSS stops the labels overlapping by letting them
+     wrap, which makes the bar TALLER: Chromium measured 103.5px in Kannada and
+     137.2px in Kannada with large text, both past the reserved space, so the
+     last pixels of the page sat behind the bar. Trading a horizontal overflow
+     for a vertical one is not a fix.
+
+     §7 raises the floor in CSS, so the app is correct even if this script never
+     runs. This function then tightens the reservation to the height actually
+     measured, so English does not carry ~70px of dead space at the bottom.
+     Inline style, so there is no specificity fight with the stylesheet.      */
+  var LAST_FIT = -1;
+  function fitTabbar(){
+    var bar = document.getElementById("tabbar"), m = document.querySelector("main"), h;
+    if(!bar || !m) return 0;
+    h = bar.offsetHeight || 0;
+    /* Above 820px the bar is display:none and reports 0. Hand the reservation
+       back to the stylesheet instead of clamping it to a stale number. */
+    if(h <= 0){
+      if(LAST_FIT !== 0){ m.style.paddingBottom = ""; LAST_FIT = 0; }
+      return 0;
+    }
+    /* Writing only on a real change is what stops a ResizeObserver ping-pong:
+       if adding bottom padding ever introduced a scrollbar, narrowed the
+       viewport and re-wrapped a label, the second pass would settle here. */
+    if(Math.abs(h - LAST_FIT) < 1) return h;
+    LAST_FIT = h;
+    m.style.paddingBottom = (h + 14) + "px";
+    return h;
+  }
+
+  var HOME_WRAPPED = false;
+  try{
+    /* RENDER is a top-level const, so it is in the shared lexical scope but is
+       NOT a property of window. Testing window.RENDER made this whole install
+       block dead code — the reason the wording fix appeared to do nothing.
+       Function DECLARATIONS (inMatch, runSearch, inBrandDisplay) are window
+       properties and are safe to reach through window; const/let are not. */
+    if(typeof RENDER === "object" && RENDER && typeof RENDER.home === "function"){
+      var _origHome = RENDER.home;
+      RENDER.home = function(){
+        var r = _origHome.apply(this, arguments);
+        /* greetFix runs unconditionally; homeFix returns early in the two states
+           v12 already words correctly, so it cannot be the one carrying it. */
+        try{ greetFix(); }catch(e){}
+        try{ homeFix(); }catch(e){}
+        return r;
+      };
+      HOME_WRAPPED = true;
+      /* v12 already landed on Home before this block ran, so the card on screen
+         right now was drawn by the unwrapped function. Fix it in place. */
+      try{ greetFix(); }catch(e){}
+      try{ homeFix(); }catch(e){}
+    }
+  }catch(e){}
+
+  /* Re-fit the reservation whenever the bar can change height. ResizeObserver
+     catches every cause at once — rotation, the language picker, the large-text
+     toggle, a late font swap — and is Chrome 64+, so the WebView 79 target has
+     it. The applyPrefs wrapper and the resize listener are the fallback for
+     anything older; applyPrefs is a function DECLARATION, so unlike RENDER it
+     really is a window property and is safe to wrap this way. */
+  var PREFS_WRAPPED = false;
+  try{
+    fitTabbar();
+    if(typeof ResizeObserver === "function"){
+      var _bar = document.getElementById("tabbar");
+      if(_bar) new ResizeObserver(function(){ try{ fitTabbar(); }catch(e){} }).observe(_bar);
+    }
+    if(window.addEventListener) window.addEventListener("resize", function(){ try{ fitTabbar(); }catch(e){} });
+    if(typeof window.applyPrefs === "function"){
+      var _origPrefs = window.applyPrefs;
+      window.applyPrefs = function(){
+        var r = _origPrefs.apply(this, arguments);
+        try{ fitTabbar(); }catch(e){}
+        return r;
+      };
+      PREFS_WRAPPED = true;
+    }
+  }catch(e){}
+
+  /* =========================================================================
+     §3 Indian-brand search engine
+     ====================================================================== */
+  var IDX = window.INDIAN_INDEX,
+      B = (IDX && IDX.brands && IDX.brands.length) ? IDX.brands : null,
+      SORTED = false,
+      WALK = 25000,             /* ceiling only. The walk normally stops after
+                                   cap distinct compositions, so this is reached
+                                   solely by a deliberate uncapped call. */
+      FZ = null,                /* last fuzzy resolution: {q,qn,byCid:{}} */
+      _origMatch = window.inMatch,
+      _origBD = window.inBrandDisplay;
+
+  /* The binary search below is only valid if brands really are sorted. v9
+     asserted this; verify it cheaply instead of trusting it, and fall back to
+     the original implementation if it ever stops being true. */
+  try{
+    if(B && B.length > 1){
+      SORTED = true;
+      var _st = Math.floor(B.length / 400); if(_st < 1) _st = 1;
+      for(var _i = _st; _i < B.length; _i += _st){
+        if(String(B[_i-1][0]) > String(B[_i][0])){ SORTED = false; break; }
+      }
+    }
+  }catch(e){ SORTED = false; }
+
+  /* first index whose brand is >= p */
+  function lower(p){
+    var lo = 0, hi = B.length, mid;
+    while(lo < hi){
+      mid = (lo + hi) >> 1;
+      if(B[mid][0] < p) lo = mid + 1; else hi = mid;
+    }
+    return lo;
+  }
+
+  /* All compositions whose brand starts with p, most relevant first.
+     ------------------------------------------------------------------------
+     The whole ranking falls out of the sort order for free, which is why this
+     needs no scoring pass and no sort. In ASCII, space (0x20) < digits (0x30) <
+     letters (0x61), so walking forward from the first row that starts with "pan"
+     visits, in this exact order:
+         "pan"            <- the base product itself
+         "pan 40", "pan d"…  <- p is the whole first word
+         "pan40"          <- p plus digits
+         "pancef", "pantop"…  <- p plus letters, i.e. a different word
+     Relevance is therefore non-decreasing along the walk, so the FIRST row that
+     mentions a composition is always its best row, and once cap distinct
+     compositions have been collected nothing later can outrank them. That turns
+     the old full-array scan into O(log n + cap).
+     ------------------------------------------------------------------------ */
+  function rankPrefix(p, cap){
+    var i, walked = 0, nb, cid, out = [], seen = {};
+    if(!B || !p) return [];
+    cap = cap || 5;
+    i = lower(p);
+    while(i < B.length && walked < WALK){
+      nb = B[i][0];
+      /* lastIndexOf(p,0) is a prefix test that allocates nothing; substring()
+         here allocated a string per row and dominated the cost. */
+      if(nb.lastIndexOf(p, 0) !== 0) break;
+      cid = B[i][1];
+      if(seen[cid] !== 1){
+        seen[cid] = 1;
+        out.push(cid);
+        if(out.length >= cap) break;
+      }
+      i++; walked++;
+    }
+    return out;
+  }
+  /* Exactly the rows the original reached through _inExact.get(p) plus
+     _inFirst.get(p): the bare brand p itself, and every brand whose FIRST WORD
+     is p. Needed because the missing-space fallback for "dolo650" must still
+     surface the plain "Dolo" row (cid 67 = Paracetamol) — the best possible
+     answer for that query, which a bare "dolo " prefix cannot match.
+     Space being the lowest continuation byte means those rows are contiguous and
+     come first, so the walk stops at the first digit/letter continuation. */
+  function wordPrefix(p, cap){
+    var i, walked = 0, nb, cid, out = [], seen = {}, ps = p + " ";
+    if(!B || !p) return [];
+    cap = cap || 5;
+    i = lower(p);
+    while(i < B.length && walked < WALK){
+      nb = B[i][0];
+      if(nb.lastIndexOf(p, 0) !== 0) break;                              /* left the p block */
+      if(nb.length !== p.length && nb.lastIndexOf(ps, 0) !== 0) break;   /* p is not a whole word here */
+      cid = B[i][1];
+      if(seen[cid] !== 1){
+        seen[cid] = 1;
+        out.push(cid);
+        if(out.length >= cap) break;
+      }
+      i++; walked++;
+    }
+    return out;
+  }
+
+  function brandOf(cid, p){          /* first (= best) indexed brand for cid under p */    var i, walked = 0, nb;
+    if(!B || !p) return null;
+    i = lower(p);
+    while(i < B.length && walked < WALK){
+      nb = B[i][0];
+      if(nb.lastIndexOf(p, 0) !== 0) break;
+      if(B[i][1] === cid) return nb;
+      i++; walked++;
+    }
+    return null;
+  }
+
+  /* ---- typo tolerance ---------------------------------------------------
+     Runs ONLY when every exact/word/prefix path found nothing, so a correctly
+     spelled query never pays for it.
+
+     The pool is the distinct FIRST WORDS of brands (_inFirst's keys — far fewer
+     than the 184k brand rows), because a misspelling lands on the product's
+     first word in practice. Two cheap gates run before the O(n·m) edit
+     distance, and both are SOUND (they can only reject pairs that are genuinely
+     too far apart, never a real match):
+       1. length must be within maxD;
+       2. character-set difference. Every letter present in the query but absent
+          from the candidate costs at least one edit, so if more than maxD
+          letters are missing the pair cannot be within maxD. One 32-bit mask
+          per string, precomputed once for the pool.
+     The v13.0 first cut skipped these, spent its whole 90ms budget on
+     Map.forEach + levenshtein, and recovered only 30% of typos — the budget,
+     not the algorithm, was the limit. Insertion order decided who got scanned. */
+  var FPOOL = null;
+  function cmask(s){
+    var m = 0, i, c;
+    for(i = 0; i < s.length; i++){
+      c = s.charCodeAt(i);
+      if(c >= 97 && c <= 122) m |= (1 << (c - 97));
+      else if(c >= 48 && c <= 57) m |= 0x4000000;
+      else m |= 0x8000000;
+    }
+    return m;
+  }
+  function popcount(x){
+    x = x - ((x >> 1) & 0x55555555);
+    x = (x & 0x33333333) + ((x >> 2) & 0x33333333);
+    x = (x + (x >> 4)) & 0x0f0f0f0f;
+    return (x & 0xff) + ((x >> 8) & 0xff) + ((x >> 16) & 0xff) + ((x >> 24) & 0xff);
+  }
+  /* byLen[n] = flat [key, mask, key, mask, …] — a flat array of primitives
+     rather than objects keeps the build cheap and the scan allocation-free. */
+  function fpool(){
+    var pool = null, byLen = {}, n = 0;
+    if(FPOOL) return FPOOL;
+    try{ inBuild(); }catch(e){}
+    try{ pool = (typeof _inFirst !== "undefined" && _inFirst) ? _inFirst : null; }catch(e){ pool = null; }
+    if(!pool || typeof pool.forEach !== "function"){ FPOOL = {byLen:{}, keys:0}; return FPOOL; }
+    pool.forEach(function(_v, k){
+      var L;
+      if(typeof k !== "string") return;
+      L = k.length;
+      if(L < 4 || L > 24) return;
+      if(!byLen[L]) byLen[L] = [];
+      byLen[L].push(k, cmask(k));
+      n++;
+    });
+    FPOOL = {byLen:byLen, keys:n};
+    return FPOOL;
+  }
+
+  var FZSTAT = {calls:0, scanned:0, tested:0, ms:0, truncated:0};
+  function fuzzyStems(qn, want){
+    var P, maxD, qm, t0 = now(), cand = [], L, arr, i, d, lens, li, out = [];
+    if(!qn || qn.length < 4 || qn.indexOf(" ") >= 0) return [];
+    if(typeof levenshtein !== "function") return [];
+    P = fpool();
+    if(!P.keys) return [];
+    maxD = qn.length >= 7 ? 2 : 1;
+    qm = cmask(qn);
+    FZSTAT.calls++;
+    lens = [];
+    for(li = -maxD; li <= maxD; li++){ if(qn.length + li >= 4) lens.push(qn.length + li); }
+    for(li = 0; li < lens.length; li++){
+      L = lens[li];
+      arr = P.byLen[L];
+      if(!arr) continue;
+      for(i = 0; i < arr.length; i += 2){
+        FZSTAT.scanned++;
+        /* sound rejection: letters in the query that the candidate lacks */
+        if(popcount(qm & ~arr[i + 1]) > maxD) continue;
+        if(popcount(arr[i + 1] & ~qm) > maxD) continue;
+        FZSTAT.tested++;
+        d = levenshtein(qn, arr[i], maxD);
+        if(d <= maxD) cand.push(arr[i], d);
+      }
+      if((now() - t0) > 250){ FZSTAT.truncated++; break; }   /* safety net only */
+    }
+    FZSTAT.ms += now() - t0;
+    if(!cand.length) return [];
+    /* nearest first; then prefer the shorter token (a base product over a
+       line extension); then alphabetical so the order is stable */
+    var idx = [], k;
+    for(k = 0; k < cand.length; k += 2) idx.push(k);
+    idx.sort(function(a, b){
+      if(cand[a + 1] !== cand[b + 1]) return cand[a + 1] - cand[b + 1];
+      if(cand[a].length !== cand[b].length) return cand[a].length - cand[b].length;
+      return cand[a] < cand[b] ? -1 : (cand[a] > cand[b] ? 1 : 0);
+    });
+    for(k = 0; k < idx.length && out.length < (want || 3); k++) out.push(cand[idx[k]]);
+    return out;
+  }
+
+  /* The app already has a curated did-you-mean: runSearch() calls
+     fuzzySuggestions(q,3) over NAME_INDEX when NOTHING matched, and offers real
+     curated medicines — which carry interaction data that an Indian-index row
+     does not. Returning an Indian fuzzy row would make html non-empty and
+     silently suppress that better answer, so curated wins and we stand down. */
+  function curatedHasSuggestion(q){
+    try{
+      if(typeof fuzzySuggestions !== "function") return false;
+      return (fuzzySuggestions(q, 1) || []).length > 0;
+    }catch(e){ return false; }
+  }
+
+  function mergeIn(dst, src, cap){
+    var i, seen = {}, j;
+    for(j = 0; j < dst.length; j++) seen[dst[j]] = 1;
+    for(i = 0; i < src.length && dst.length < cap; i++){
+      if(seen[src[i]] !== 1){ seen[src[i]] = 1; dst.push(src[i]); }
+    }
+    return dst;
+  }
+
+  function matchNew(q, cap){
+    var qn, out, mm, stems, si, got, stem, gi;
+    if(!B || !SORTED) return _origMatch(q, cap);      /* never worse than before */
+    cap = cap || 5;
+    try{ qn = inNorm(q); }catch(e){ return _origMatch(q, cap); }
+    if(!qn || qn.length < 2) return [];
+    /* drop a stale correction as soon as the query changes, so inBrandDisplay
+       can never resolve one query's row through another query's stem */
+    if(FZ && FZ.q !== String(q)) FZ = null;
+
+    out = rankPrefix(qn, cap);
+
+    /* missing-space fallback, preserved from the original: "dolo650".
+       Second pass is wordPrefix(mm[1]), which is the original's
+       _inExact.get(mm[1]) + _inFirst.get(mm[1]) — it keeps the plain "Dolo" row
+       while still refusing to drag in "Doloact", which a bare prefix walk would. */
+    if(!out.length){
+      mm = /^([a-z]{3,})(\d{2,4})$/.exec(qn);
+      if(mm){
+        out = rankPrefix(mm[1] + " " + mm[2], cap);
+        if(out.length < cap) out = mergeIn(out, wordPrefix(mm[1], cap), cap);
+      }
+    }
+
+    /* typo tolerance, last resort, and only if the curated did-you-mean has
+       nothing better to offer */
+    if(!out.length && !curatedHasSuggestion(q)){
+      stems = fuzzyStems(qn, 3);
+      if(stems.length){
+        FZ = {q:String(q), qn:qn, stems:stems, byCid:{}};
+        for(si = 0; si < stems.length && out.length < cap; si++){
+          stem = stems[si];
+          got = rankPrefix(stem, cap);
+          for(gi = 0; gi < got.length && out.length < cap; gi++){
+            if(has(FZ.byCid, "c" + got[gi])) continue;
+            FZ.byCid["c" + got[gi]] = stem;   /* remember which token to DISPLAY */
+            out.push(got[gi]);
+          }
+        }
+        if(!out.length) FZ = null;
+      }
+    }
+    return out;
+  }
+
+  try{
+    if(typeof _origMatch === "function"){
+      window.inMatch = function(q, cap){
+        try{ return matchNew(q, cap); }catch(e){ return _origMatch(q, cap); }
+      };
+    }
+  }catch(e){}
+
+  /* Display safety (see the header). A corrected query is rendered through its
+     corrected index token, so the misspelling can never reach .gname and from
+     there the check list. */
+  function safeBrand(q, cid){
+    var s = null, stem = (FZ && FZ.q === String(q)) ? FZ.byCid["c"+cid] : null;
+    try{
+      if(stem) s = _origBD.call(window, stem, cid);
+      if(!s) s = _origBD.call(window, q, cid);
+    }catch(e){}
+    return s || "";
+  }
+  try{
+    if(typeof _origBD === "function"){
+      window.inBrandDisplay = function(q, cid){
+        try{
+          var stem = (FZ && FZ.q === String(q) && has(FZ.byCid, "c"+cid)) ? FZ.byCid["c"+cid] : null,
+              s;
+          if(stem){ s = _origBD.call(this, stem, cid); if(s) return s; }
+        }catch(e){}
+        return _origBD.apply(this, arguments);
+      };
+    }
+  }catch(e){}
+
+  /* =========================================================================
+     §4 "Show more Indian brands"
+     runSearch() renders at most a handful of Indian rows (cnt caps at 10 across
+     the whole list). The extra matches are appended as a collapsed block with
+     real, wired rows — identical markup and identical click behaviour to the
+     app's own rows, so a medicine added from here travels the same
+     confirmMedicine() path and cannot skip the confirmation step.
+     ====================================================================== */
+  var TOK = 0;
+
+  function actLabel(acts){
+    var i, a = [];
+    for(i = 0; i < acts.length; i++) a.push(acts[i].ing);
+    return a.join(" + ");
+  }
+  function rowHTML(cid, name, sub, confident){
+    var info = E(T("btn_info")), badge = "";
+    try{ badge = verifyBadge(confident ? "green" : "amber"); }catch(e){}
+    return '<div class="sugrow"><button class="sug" data-kind="indian" data-cid="' + E(cid) + '">' +
+           '<span><span class="gname">' + E(name) + '</span> ' + badge +
+           '<br><span class="bnames">= ' + E(sub) + '</span></span>' +
+           '<span class="srcflag">🇮🇳 India</span></button>' +
+           '<button class="infobtn" data-infoindia="' + E(cid) + '" title="' + info + '">' + info + '</button></div>';
+  }
+
+  function extrasFor(q, wrap){
+    var have = {}, sigs = {}, shown = {}, rows, i, r, g, bn, cidEl, all, out = [],
+        cid, acts, label, sub, nm, sig, gen;
+    rows = wrap.querySelectorAll(".sugrow");
+    for(i = 0; i < rows.length; i++){
+      r = rows[i];
+      cidEl = r.querySelector("[data-cid]");
+      if(cidEl) have["c" + cidEl.getAttribute("data-cid")] = 1;
+      g = r.querySelector(".gname"); bn = r.querySelector(".bnames");
+      sigs[(trim(g ? g.textContent : "") + "|" + trim(bn ? bn.textContent : "")).toLowerCase()] = 1;
+      /* every ingredient text already on screen, curated rows included, so the
+         app's own suppression rule below can be applied to the extras too */
+      if(g) shown[trim(g.textContent).toLowerCase()] = 1;
+      if(bn) shown[trim(String(bn.textContent).replace(/^=\s*/, "").replace(/^💊\s*/, "")).toLowerCase()] = 1;
+    }
+    /* Ask for a deep pool: the composition/curated suppression below discards a
+       fair share, and the walk is now cheap enough (about 0.02 ms) that asking
+       for 48 candidates to fill 12 rows costs nothing measurable. */
+    all = window.inMatch(q, 48) || [];
+    for(i = 0; i < all.length && out.length < 12; i++){
+      cid = all[i];
+      if(has(have, "c" + cid)) continue;
+      try{ acts = inActives(cid) || []; }catch(e){ continue; }
+      if(!acts.length) continue;
+      label = actLabel(acts);
+      /* Two suppression rules copied from the app's own list builder
+         (work11.html lines 2995-2997), because extras that ignore them quietly
+         undo them: one row per composition, and no Indian row for a single
+         active whose curated row is already visible — "Dolo = Paracetamol"
+         directly under the curated Paracetamol card is noise, and the curated
+         card is the one carrying interaction data. */
+      if(has(shown, String(label).toLowerCase())) continue;
+      if(acts.length === 1){
+        gen = "";
+        try{ if(acts[0].medId && byId(acts[0].medId)) gen = String(byId(acts[0].medId).generic || ""); }catch(e){ gen = ""; }
+        if(gen && has(shown, gen.toLowerCase())) continue;
+      }
+      shown[String(label).toLowerCase()] = 1;
+      sub = acts.length > 1 ? ("💊 " + label) : label;
+      nm = safeBrand(q, cid);
+      if(!nm) continue;
+      /* keep v9's DS_QA9 invariant: no two visible rows may repeat the same
+         name + ingredient pair */
+      sig = (nm + "|= " + sub).toLowerCase();
+      if(has(sigs, sig)) continue;
+      sigs[sig] = 1;
+      out.push({cid:cid, name:nm, sub:sub});
+    }
+    return out;
+  }
+
+  function wireExtras(box, wrap, onPick){
+    var sugs = box.querySelectorAll(".sug"), ibs = box.querySelectorAll(".infobtn"), j;
+    for(j = 0; j < sugs.length; j++){
+      (function(b){
+        b.addEventListener("click", function(){
+          var gn = b.querySelector(".gname"),
+              spec = {kind:"indian", cid:+b.getAttribute("data-cid"),
+                      label:trim(gn ? gn.textContent : "")};
+          spec.onChoose = function(){
+            try{
+              var sw = wrap.closest ? wrap.closest(".searchwrap") : null,
+                  inp = sw ? sw.querySelector("input") : null;
+              if(inp){ inp.focus(); inp.select(); }
+            }catch(e){}
+          };
+          wrap.innerHTML = "";
+          confirmMedicine(spec, function(items){
+            var z;
+            if(typeof onPick !== "function") return;
+            for(z = 0; z < items.length; z++) onPick(items[z]);
+          });
+        });
+      })(sugs[j]);
+    }
+    for(j = 0; j < ibs.length; j++){
+      (function(b){
+        b.addEventListener("click", function(e){
+          try{ e.stopPropagation(); }catch(e2){}
+          var v = b.getAttribute("data-infoindia");
+          if(v !== null && typeof showIndianInfo === "function") showIndianInfo(+v);
+        });
+      })(ibs[j]);
+    }
+  }
+
+  function moreRows(q, boxSel, onPick){
+    var wrap = document.querySelector(boxSel), extras, confident, html, i, block, btn, box;
+    if(!wrap || !wrap.innerHTML) return false;          /* cleared or no matches */
+    if(!wrap.querySelector(".sugrow")) return false;    /* "did you mean" / no-match text */
+    if(wrap.querySelector(".ds13more")) return false;   /* idempotent */
+    if(typeof window.inMatch !== "function" || typeof inActives !== "function") return false;
+
+    extras = extrasFor(q, wrap);
+    if(!extras.length) return false;
+    confident = false;
+    try{ confident = !!inMatchConfident(q); }catch(e){}
+
+    html = '<div class="ds13more"><button type="button" class="ds13morebtn">+ ' +
+           E(TV("ds13_more_n", {n: extras.length})) + '</button><div class="ds13extra" hidden>';
+    for(i = 0; i < extras.length; i++) html += rowHTML(extras[i].cid, extras[i].name, extras[i].sub, confident);
+    html += '</div></div>';
+
+    wrap.insertAdjacentHTML("beforeend", html);
+    block = wrap.querySelector(".ds13more");
+    if(!block) return false;
+    btn = block.querySelector(".ds13morebtn");
+    box = block.querySelector(".ds13extra");
+    if(btn && box){
+      btn.addEventListener("click", function(){
+        var hidden = box.hasAttribute("hidden");
+        if(hidden) box.removeAttribute("hidden"); else box.setAttribute("hidden", "");
+        btn.innerHTML = (hidden ? "− " : "+ ") +
+          E(hidden ? T("ds13_more_hide") : TV("ds13_more_n", {n: extras.length}));
+      });
+      wireExtras(box, wrap, onPick);
+    }
+    return true;
+  }
+
+  var RUN_WRAPPED = false;
+  try{
+    if(typeof window.runSearch === "function"){
+      var _origRun = window.runSearch;
+      window.runSearch = function(q, boxSel, onPick){
+        var my = ++TOK, r = _origRun.apply(this, arguments);
+        function after(){
+          /* a newer keystroke has already started: its box wins */
+          try{ if(my === TOK) moreRows(q, boxSel, onPick); }catch(e){}
+        }
+        if(r && typeof r.then === "function"){ r.then(after, function(){}); return r; }
+        after();
+        return r;
+      };
+      RUN_WRAPPED = true;
+    }
+  }catch(e){}
+
+  /* =========================================================================
+     §5 DS_QA13 — cheap assertions run at load; full() is opt-in because the
+     typo-recovery sample walks the fuzzy pool dozens of times.
+     ====================================================================== */
+  function suite(){
+    var R = [], t0 = now();
+    function ok(name, cond, note){ R.push({name:name, pass:!!cond, note:note || ""}); }
+    function safe(name, fn){
+      try{ fn(function(c, n){ ok(name, c, n); }); }
+      catch(e){ ok(name, false, "threw: " + (e && e.message)); }
+    }
+
+    safe("index sorted (binary search is valid)", function(a){ a(!B || SORTED); });
+    safe("short query returns nothing", function(a){
+      a((window.inMatch("a", 6) || []).length === 0);
+    });
+    safe("junk query cannot throw", function(a){
+      var bad = ["", null, undefined, "!!!", "  ", "12"], i, n = 0;
+      for(i = 0; i < bad.length; i++){ if((window.inMatch(bad[i], 6) || []).length === 0) n++; }
+      a(n === bad.length, n + "/" + bad.length + " returned empty");
+    });
+    safe("cap is honoured (QA9 calls inMatch with 2)", function(a){
+      a((window.inMatch("crocin", 2) || []).length <= 2);
+    });
+    safe("every hit is a real prefix match", function(a){
+      var qs = ["dolo", "crocin", "lenm", "aceclo", "meta"], i, j, cids, bad = 0, qn;
+      for(i = 0; i < qs.length; i++){
+        qn = inNorm(qs[i]);
+        cids = window.inMatch(qs[i], 6) || [];
+        for(j = 0; j < cids.length; j++){ if(!brandOf(cids[j], qn)) bad++; }
+      }
+      a(bad === 0, bad + " hit(s) had no brand under the query prefix");
+    });
+    safe("exact brand outranks its extensions", function(a){
+      var qs = ["dolo", "crocin", "zifi"], i, top, qn, nb, bad = 0;
+      for(i = 0; i < qs.length; i++){
+        qn = inNorm(qs[i]);
+        if(!B || lower(qn) >= B.length || B[lower(qn)][0] !== qn) continue;  /* no exact row */
+        top = (window.inMatch(qs[i], 1) || [])[0];
+        nb = (top === undefined) ? null : brandOf(top, qn);
+        if(nb !== qn) bad++;
+      }
+      a(bad === 0, bad + " query/queries did not put the base product first");
+    });
+    safe("plural agreement in the home card", function(a){
+      var one = (I18N && I18N.en) ? I18N.en.ds13_among_1 : "";
+      a(one.indexOf("medicines") < 0 && one.indexOf("1 medicine") >= 0, one);
+    });
+    safe("RENDER.home is actually wrapped", function(a){
+      /* The install block was dead code once (it guarded on window.RENDER, which
+         is undefined for a const). Every other assertion still passed, so the
+         install itself has to be asserted, not assumed. */
+      a(HOME_WRAPPED === true, "wrapper not installed");
+    });
+    safe("the greeting emoji is welded to the name", function(a){
+      /* Chromium showed the 👋 wrapping onto a line of its own at 360px. The
+         weld is invisible in source, so assert the absence of a plain space
+         before a surrogate rather than trusting the character. */
+      var host = document.getElementById("view-home"), h, txt;
+      function anyTextNode(n){
+        var i;
+        if(!n) return false;
+        if(n.nodeType === 3) return true;
+        for(i = 0; n.childNodes && i < n.childNodes.length; i++){
+          if(anyTextNode(n.childNodes[i])) return true;
+        }
+        return false;
+      }
+      if(!host) { a(true, "no home view in this build"); return; }
+      h = null;
+      try{ h = host.querySelector(".ds12greet"); }catch(e){ h = null; }
+      if(!h) { a(true, "greeting not rendered in this build"); return; }
+      /* The weld edits a text node. The Node harness models text as strings, not
+         nodes (its textContent still carries raw entities), so there is nothing
+         to edit there and the check does not apply — real Chromium is the
+         authority for this one. Detect that rather than relax the assertion. */
+      if(!anyTextNode(h)) { a(true, "this DOM exposes no text nodes (harness)"); return; }
+      txt = String(h.textContent || "");
+      if(!/[\uD800-\uDBFF]/.test(txt)) { a(true, "no emoji in this greeting"); return; }
+      a(!/ [\uD800-\uDBFF]/.test(txt), "plain space still precedes the emoji: " + txt);
+    });
+    safe("every wrapper this pack installs is live", function(a){
+      a(HOME_WRAPPED === true && RUN_WRAPPED === true && window.inMatch !== _origMatch,
+        "home=" + HOME_WRAPPED + " search=" + RUN_WRAPPED +
+        " inMatch=" + (window.inMatch !== _origMatch));
+    });
+    safe("the tab bar never covers the end of the page", function(a){
+      /* The §6 wrap fix made the bar taller than main's 5.5rem reservation in
+         Kannada. Assert the reservation against the bar's MEASURED height, so
+         this cannot regress silently when a label or a font changes. */
+      var bar = document.getElementById("tabbar"), m = document.querySelector("main"), h, reserved;
+      if(!bar || !m){ a(true, "no tab bar in this build"); return; }
+      h = bar.offsetHeight || 0;
+      if(h <= 0){ a(true, "bar not laid out (harness, or desktop width where it is hidden)"); return; }
+      reserved = parseFloat(m.style.paddingBottom || "0") || 0;
+      a(reserved >= h, "reserved " + reserved + "px for a " + h + "px bar");
+    });
+    safe("the large-text toggle re-fits the tab bar", function(a){
+      /* fitTabbar is only correct if something calls it after the bar changes
+         height. ResizeObserver does in Chromium; this asserts the fallback path
+         exists too, because that is the one no browser here exercises. */
+      if(typeof window.applyPrefs !== "function"){ a(true, "no applyPrefs in this build"); return; }
+      a(PREFS_WRAPPED === true, "applyPrefs was not wrapped");
+    });
+    safe("scan() is passed the profile", function(a){
+      /* The whole home fix was silently inert because scan() was called with no
+         argument: scan(p) reads p.meds, so it reported an empty list for
+         everyone and homeFix returned early. Nothing else here caught that. */
+      var p = null, w;
+      try{ if(typeof prof === "function") p = prof(); }catch(e){}
+      if(!p){ a(true, "no profile in this build"); return; }
+      w = window.DS_HOME12.scan(p);
+      a(!!w && w.n === (p.meds ? p.meds.length : 0),
+        "scan(prof()).n=" + (w && w.n) + " vs meds=" + (p.meds ? p.meds.length : 0));
+    });
+    safe("wording on screen is the v13 wording wherever it applies", function(a){
+      var p = null, sc, host = document.getElementById("view-home"), sEl, alerts, want;
+      try{ if(typeof prof === "function") p = prof(); }catch(e){}
+      if(!host || !p || !p.meds || !p.meds.length){ a(true, "empty list — v12 wording is correct"); return; }
+      sc = window.DS_HOME12.scan(p);
+      alerts = (sc.major || 0) + (sc.mod || 0);
+      if(alerts !== 0){ a(true, "findings listed — v12 wording is correct"); return; }
+      sEl = host.querySelector(".ds12sts");
+      if(!sEl){ a(true, "card not rendered yet"); return; }
+      want = (sc.checked === 0) ? T("ds13_unchk_b") : subText(sc.checked);
+      a(trim(sEl.textContent) === trim(want), "on screen: " + trim(sEl.textContent));
+    });
+    safe("home wording keys exist in all three languages", function(a){
+      var langs = ["en", "hi", "kn"], keys = ["ds13_among_1", "ds13_among_n", "ds13_unchk_h", "ds13_unchk_b", "ds13_more_n"],
+          i, j, miss = 0;
+      for(i = 0; i < langs.length; i++){
+        for(j = 0; j < keys.length; j++){ if(!I18N[langs[i]] || !I18N[langs[i]][keys[j]]) miss++; }
+      }
+      a(miss === 0, miss + " missing");
+    });
+    safe("extra rows carry a cid and an amber-or-green badge", function(a){
+      var h = rowHTML(7, "Dolo 650", "Paracetamol", false);
+      a(h.indexOf('data-cid="7"') > 0 && h.indexOf('data-kind="indian"') > 0 && h.indexOf("gname") > 0);
+    });
+    safe("nothing the original engine found is lost", function(a){
+      /* Earns its cost: the missing-space fallback silently dropped the plain
+         "Dolo" row for "dolo650" — the single best answer for that query — while
+         passing every other assertion here. Capped, and only three queries,
+         because the ORIGINAL walks the whole 184k-row array and this suite runs
+         at page load on slow phones. rank13.js does the 365-query version. */
+      var qs = ["dolo650", "pan 40", "crocin"], i, j, o, n, have, miss = 0, worst = "";
+      for(i = 0; i < qs.length; i++){
+        o = _origMatch(qs[i], 6) || [];
+        n = window.inMatch(qs[i], 6) || [];
+        have = {};
+        for(j = 0; j < n.length; j++) have["c" + n[j]] = 1;
+        for(j = 0; j < o.length; j++){ if(have["c" + o[j]] !== 1){ miss++; worst = qs[i]; } }
+      }
+      a(miss === 0, miss + " lost (e.g. " + worst + ")");
+    });
+    safe("dolo650 still reaches plain Paracetamol", function(a){
+      var cids = window.inMatch("dolo650", 6) || [], i, found = false;
+      for(i = 0; i < cids.length; i++){
+        if(String(inCompLabel(cids[i]) || "").toLowerCase() === "paracetamol") found = true;
+      }
+      a(found, cids.length + " row(s), none plain paracetamol");
+    });
+    return {total:R.length, passed:cnt(R, true), failed:cnt(R, false), ms:now() - t0, results:R};
+    function cnt(a, v){ var i, n = 0; for(i = 0; i < a.length; i++){ if(a[i].pass === v) n++; } return n; }
+  }
+
+  /* Typo recovery, measured against the real index: corrupt one letter of a
+     genuine brand's first word, then ask whether the app still leads the user to
+     the right medicine — either through an Indian fuzzy row or through the
+     curated did-you-mean, since both are real outcomes on screen. The split is
+     reported so neither can flatter the other.
+     The hard requirement, separate from recall: the misspelling must NEVER be
+     rendered as a product name. */
+  function full(sampleN){
+    var N = sampleN || 40, i, step, nb, first, typo, cids, j, hit, disp,
+        tried = 0, byFuzzy = 0, byCurated = 0, echoed = 0, t0 = now(), missed = [];
+    if(!B) return {skipped:"no index"};
+    step = Math.floor(B.length / (N + 2)); if(step < 1) step = 1;
+    for(i = step; i < B.length && tried < N; i += step){
+      nb = B[i][0];
+      first = nb.split(" ")[0];
+      if(first.length < 6 || /[^a-z]/.test(first)) continue;
+      /* substitute one interior letter — the commonest real mistyping */
+      typo = first.substring(0, 3) + (first.charAt(3) === "x" ? "z" : "x") + first.substring(4);
+      if(rankPrefix(typo, 1).length) continue;      /* the "typo" is a real brand */
+      tried++;
+      cids = window.inMatch(typo, 6) || [];
+      hit = false;
+      for(j = 0; j < cids.length; j++){ if(cids[j] === B[i][1]) hit = true; }
+      if(hit) byFuzzy++;
+      else if(curatedHasSuggestion(typo)) byCurated++;
+      else if(missed.length < 8) missed.push(typo + " (" + first + ")");
+      for(j = 0; j < cids.length; j++){
+        disp = String(window.inBrandDisplay(typo, cids[j]) || "").toLowerCase();
+        if(disp.replace(/\s+/g, "").indexOf(typo) === 0) echoed++;   /* must never happen */
+      }
+    }
+    var helped = byFuzzy + byCurated;
+    return {tried:tried, byFuzzy:byFuzzy, byCurated:byCurated, helped:helped,
+            rate: tried ? Math.round(helped * 100 / tried) : 0,
+            fuzzyRate: tried ? Math.round(byFuzzy * 100 / tried) : 0,
+            missedSample: missed, echoedTypo:echoed, ms:now() - t0, stats:FZSTAT,
+            pass: (tried > 0 && echoed === 0 && (helped * 100 / tried) >= 60)};
+  }
+
+  var QA = null;
+  try{ QA = suite(); }catch(e){ QA = {total:0, passed:0, failed:1, results:[{name:"suite threw", pass:false, note:String(e && e.message)}]}; }
+  try{
+    if(QA && QA.failed) console.warn("[DawaSafe v13] QA13", QA.failed + " failed", QA.results);
+  }catch(e){}
+
+  /* Same namespace shape as DS_QA8/9/10 — {version, run, last, cases} — so one
+     harness reader works for every suite in the file. full() is separate
+     because the typo-recovery sample walks the fuzzy pool dozens of times and
+     is far too slow to run at page load. */
+  window.DS_QA13 = {
+    version: "13.0",
+    last: QA,
+    run: function(){ var r = suite(); window.DS_QA13.last = r; return r; },
+    cases: suite,
+    full: full
+  };
+  window.DS_V13 = {
+    version: "13.0",
+    sorted: SORTED,
+    homeFix: homeFix,
+    subText: subText,
+    match: matchNew,
+    rankPrefix: rankPrefix,
+    wordPrefix: wordPrefix,
+    brandOf: brandOf,
+    fuzzyStems: fuzzyStems,
+    fpool: fpool,
+    fzstat: FZSTAT,
+    curatedHasSuggestion: curatedHasSuggestion,
+    safeBrand: safeBrand,
+    rowHTML: rowHTML,
+    moreRows: moreRows,
+    origMatch: _origMatch,
+    qa: suite,
+    full: full,
+    fz: function(){ return FZ; }
+  };
+
+  }catch(e){ try{ console.warn("[DawaSafe v13]", e); }catch(e2){} }
+})();
+</script>
 </body>
 </html>
